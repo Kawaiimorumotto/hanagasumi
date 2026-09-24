@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#8f3438">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="花霞">
+<link rel="manifest" href="manifest.webmanifest">
+<title>花霞</title>
+<style>
+:root{--red:#8f3438;--deep:#43282a;--gold:#b48a43;--paper:#f8f0de;--cream:#fffaf0;--line:#c8ab79;--muted:#77695e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:#201a18;color:#332927;font-family:"Hiragino Mincho ProN","Yu Mincho",serif}button,input,textarea,select{font:inherit}button{border:0}
+#app{width:100%;max-width:520px;min-height:100dvh;margin:auto;background:var(--paper);overflow:hidden;position:relative}
+header{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#fffaf0f2;border-bottom:1px solid var(--line);position:relative;z-index:10}
+.logo{font-weight:bold;letter-spacing:.18em;font-size:20px}.wallet{font-size:12px}.screen{display:none;min-height:calc(100dvh - 54px);padding-bottom:82px}.screen.active{display:block}
+.home{position:relative;background:radial-gradient(circle at 50% 20%,#fffaf0,#e8d4ae 68%,#d4bd91);overflow:hidden}
+.home:before{content:"";position:absolute;inset:0;opacity:.25;background:linear-gradient(90deg,transparent 49%,#9d3d3d 50%,transparent 51%),linear-gradient(0deg,transparent 49%,#b48a43 50%,transparent 51%);background-size:42px 42px}
+.hero{height:calc(100dvh - 136px);min-height:520px;position:relative;display:flex;justify-content:center;align-items:center}
+.char{width:min(64vw,280px);height:min(74vh,480px);min-height:370px;border-radius:46% 46% 12% 12%;background:linear-gradient(#e7c6ae 0 21%,#493034 21% 38%,#f2dfbe 38% 68%,#7e303d 68%);box-shadow:0 18px 45px #4a332533;position:relative;transition:.15s;user-select:none}
+.char.blink{filter:brightness(1.05)}
+.char:before{content:"";position:absolute;width:43%;height:28%;top:16%;left:28%;border:5px solid #432c30;border-radius:50%;background:#f3cdb4}
+.char:after{content:"";position:absolute;width:13%;height:8%;top:27%;left:37%;border-radius:50%;background:#432c30;box-shadow:110% 0 #432c30}
+.zone{position:absolute;z-index:3;border:1px dashed transparent;border-radius:30px;background:transparent}
+.zone:active{background:#8f343822}.head{top:6%;left:10%;width:80%;height:26%}.face{top:18%;left:25%;width:50%;height:20%}.hand{top:42%;left:5%;width:35%;height:28%}.body{top:40%;left:27%;width:55%;height:40%}
+.dialogue{position:absolute;left:13px;right:13px;bottom:12px;background:#fffaf0ed;border:1px solid var(--line);border-radius:12px;padding:12px 15px;box-shadow:0 7px 20px #4b30221e;z-index:5}
+.name{color:var(--red);font-size:12px;font-weight:bold}.line{font-size:16px;line-height:1.6;margin-top:3px}.meter{height:7px;background:#e0d2b7;border-radius:99px;margin-top:8px;overflow:hidden}.meter i{display:block;height:100%;background:var(--red);width:12%}.love{font-size:10px;color:var(--muted);margin-top:3px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);height:68px;padding-bottom:env(safe-area-inset-bottom);background:#fffaf0f5;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:20}
+.nav button{background:none;color:#55443d;font-size:10px;padding:6px 2px}.nav b{display:block;font-size:20px;color:var(--red);line-height:22px}
+.panel{padding:17px 14px}.panel h2{margin:2px 0 13px;font-size:20px}.card{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:10px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.item{text-align:left;background:var(--cream);border:1px solid var(--line);border-radius:11px;padding:9px}.icon{height:85px;background:#efe1c7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:42px;margin-bottom:7px}.row{display:flex;justify-content:space-between;gap:6px;align-items:center}.tag{font-size:10px;color:#785a24;border:1px solid var(--gold);border-radius:99px;padding:2px 5px}.small{font-size:11px;color:var(--muted)}.btn{background:var(--red);color:white;border:1px solid #72272b;border-radius:8px;padding:9px 12px}.btn.alt{background:var(--cream);color:var(--red);border-color:var(--line)}
+.gacha-banner{height:215px;border-radius:15px;background:linear-gradient(145deg,#652a37,#b8874d 57%,#f0ddb1);color:#fff9ec;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:0 12px 30px #43212640;margin-bottom:13px}.gacha-banner h3{font-size:27px;margin:5px}.result{line-height:1.8}
+.char-preview{height:300px;display:flex;align-items:center;justify-content:center}.char.smallchar{width:160px;height:270px}
+label{display:block;font-size:12px;margin:9px 0 5px}input,textarea,select{width:100%;background:#fffdf8;border:1px solid var(--line);border-radius:7px;padding:8px;color:#332927}textarea{resize:vertical}.tabs{display:flex;gap:6px;overflow:auto;padding-bottom:5px}.tabs button{white-space:nowrap}.editor{margin-top:10px}.hint{font-size:11px;color:var(--muted);line-height:1.55}.sep{border:0;border-top:1px solid #ddceb2;margin:14px 0}
+.modal{display:none;position:fixed;inset:0;background:#1d1614aa;z-index:40;align-items:flex-end}.modal.show{display:flex}.modalbox{width:min(520px,100%);max-height:88dvh;overflow:auto;background:var(--paper);border-radius:18px 18px 0 0;padding:16px}.toast{display:none;position:fixed;z-index:50;left:50%;bottom:86px;transform:translateX(-50%);background:#2d2421;color:white;padding:9px 14px;border-radius:99px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="logo">花霞</div><div class="wallet">花玉 <b id="gems">1200</b>　贈り物 <b id="count">0</b></div></header>
+
+<section id="home" class="screen active home">
+ <div class="hero">
+  <div id="char" class="char">
+   <button class="zone head" data-zone="head" aria-label="頭"></button><button class="zone face" data-zone="face" aria-label="顔"></button><button class="zone hand" data-zone="hand" aria-label="手"></button><button class="zone body" data-zone="body" aria-label="身体"></button>
+  </div>
+  <div class="dialogue"><div class="name" id="name">綾乃</div><div class="line" id="line">……また来たんだね。</div><div class="meter"><i id="meter"></i></div><div class="love" id="love">親密度 12 / 100</div></div>
+ </div>
+</section>
+
+<section id="gift" class="screen"><div class="panel"><h2>贈り物</h2><div class="card hint">アイテムをタップするとキャラクターに贈れます。反応と親密度は編集画面から変更できます。</div><div id="giftGrid" class="grid"></div></div></section>
+<section id="gacha" class="screen"><div class="panel"><h2>召喚</h2><div class="gacha-banner"><div>期間限定</div><h3 id="gachaName">夏祭り・百花繚乱</h3><div>SSR 5%　SR 20%　R 75%</div></div><div class="row"><button class="btn" onclick="pull(1)">1回　100花玉</button><button class="btn" onclick="pull(10)">10回　900花玉</button></div><div id="result" class="card result" style="margin-top:12px">召喚結果がここに表示されます。</div></div></section>
+<section id="dress" class="screen"><div class="panel"><h2>着せ替え</h2><div class="card"><div class="char-preview"><div class="char smallchar"></div></div><div id="outfitNow">通常衣装</div></div><div id="outfitGrid" class="grid"></div></div></section>
+<section id="edit" class="screen"><div class="panel"><h2>制作・設定</h2><div class="card"><div class="tabs"><button class="btn alt" onclick="tab('ce')">キャラ</button><button class="btn alt" onclick="tab('ge')">贈り物</button><button class="btn alt" onclick="tab('oe')">衣装</button><button class="btn alt" onclick="tab('qa')">ガチャ</button><button class="btn alt" onclick="tab('io')">保存</button></div><div id="ce" class="editor"></div><div id="ge" class="editor" style="display:none"></div><div id="oe" class="editor" style="display:none"></div><div id="qa" class="editor" style="display:none"></div><div id="io" class="editor" style="display:none"></div></div></div></section>
+
+<nav class="nav"><button onclick="go('home')"><b>花</b>ホーム</button><button onclick="go('gift')"><b>贈</b>贈り物</button><button onclick="go('gacha')"><b>召</b>ガチャ</button><button onclick="go('dress')"><b>衣</b>着せ替え</button><button onclick="go('edit')"><b>筆</b>編集</button></nav>
+</div>
+<div id="modal" class="modal"><div class="modalbox"><div id="modalBody"></div><button class="btn alt" onclick="closeModal()" style="margin-top:10px">閉じる</button></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const seed={
+character:{name:"綾乃",love:12,lines:{head:["髪、触るの好きなの？","……くすぐったいよ。","また頭を撫でてる。"],face:["そんなに顔を見る？","……近いよ。","楽しそうだね。"],hand:["手、繋ぎたいの？","……しょうがないな。","どうしたの？"],body:["そこはつつくところじゃないよ。","ふふ、元気だね。","今日はご機嫌だね。"]}},
+gifts:[
+{id:"onigiri",name:"おにぎり",icon:"🍙",rarity:"R",fav:8,normal:"お、これ好きなんだよね。",love:"具は何かな？",great:"君が握ってくれたの？",owned:3},
+{id:"apple",name:"りんご飴",icon:"🍎",rarity:"SR",fav:12,normal:"お祭りのやつだね。",love:"……これ、好き。",great:"これを選んでくれたの？",owned:2},
+{id:"matcha",name:"抹茶",icon:"🍵",rarity:"N",fav:3,normal:"渋いの選ぶね。",love:"落ち着く味だね。",great:"こういうの、覚えててくれたんだ。",owned:5},
+{id:"dango",name:"月見団子",icon:"🍡",rarity:"R",fav:7,normal:"ひとつ食べる？",love:"月がきれいな夜に食べたいね。",great:"一緒に食べよう。",owned:1},
+{id:"ramune",name:"ラムネ",icon:"🫧",rarity:"SR",fav:10,normal:"懐かしいな。",love:"祭りって感じがする。",great:"……一緒に飲む？",owned:0},
+{id:"firework",name:"花火",icon:"🎆",rarity:"SSR",fav:20,normal:"きれいだね。",love:"夜空に咲く花みたい。",great:"……君と見たかった。",owned:0}],
+outfits:[{id:"default",name:"通常衣装",rarity:"N",owned:true},{id:"summer",name:"夏祭りの浴衣",rarity:"SR",owned:false},{id:"formal",name:"月夜の晴れ着",rarity:"SSR",owned:false}],
+gacha:{name:"夏祭り・百花繚乱"}};
+let data=JSON.parse(localStorage.getItem("hanagasumi-v2")||"null")||seed;
+let gems=Number(localStorage.getItem("hanagasumi-gems")||1200);
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function save(){localStorage.setItem("hanagasumi-v2",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems);render()}
+function go(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));$(id).classList.add("active")}
+function toast(t){$("toast").textContent=t;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",1500)}
+function rand(a){return a[Math.floor(Math.random()*a.length)]}
+function render(){ $("name").textContent=data.character.name;$("meter").style.width=Math.min(100,data.character.love)+"%";$("love").textContent=`親密度 ${data.character.love} / 100`;$("gems").textContent=gems;$("count").textContent=data.gifts.reduce((s,g)=>s+g.owned,0);$("gachaName").textContent=data.gacha.name;renderGifts();renderOutfits();renderEditors()}
+document.querySelectorAll(".zone").forEach(z=>z.onclick=()=>{$("line").textContent=rand(data.character.lines[z.dataset.zone]||["……"]);$("char").classList.add("blink");setTimeout(()=>$("char").classList.remove("blink"),170)});
+function renderGifts(){$("giftGrid").innerHTML=data.gifts.map(g=>`<button class="item" onclick="give('${g.id}')"><div class="icon">${g.icon}</div><div class="row"><b>${esc(g.name)}</b><span class="tag">${g.rarity}</span></div><div class="small">所持 ${g.owned}　親密度 +${g.fav}</div></button>`).join("")}
+function give(id){let g=data.gifts.find(x=>x.id===id);if(!g.owned)return toast("そのアイテムは持っていないよ");g.owned--;data.character.love=Math.min(100,data.character.love+g.fav);$("line").textContent=data.character.love>=70?g.great:data.character.love>=30?g.love:g.normal;save();go("home");toast(g.name+"を贈った！")}
+function renderOutfits(){$("outfitGrid").innerHTML=data.outfits.map(o=>`<button class="item" onclick="equip('${o.id}')"><div class="icon">${o.id==="summer"?"👘":o.id==="formal"?"🌙":"🌸"}</div><div class="row"><b>${esc(o.name)}</b><span class="tag">${o.rarity}</span></div><div class="small">${o.owned?"所持済み":"未所持"}</div></button>`).join("")}
+function equip(id){let o=data.outfits.find(x=>x.id===id);if(!o.owned)return toast("まだ持っていない衣装だよ");$("outfitNow").textContent=o.name;toast(o.name+"に着替えた！")}
+function pull(n){let cost=n===10?900:100;if(gems<cost)return toast("花玉が足りないよ");gems-=cost;let a=[];for(let i=0;i<n;i++){let r=Math.random(),rar=r<.05?"SSR":r<.25?"SR":"R",pool=data.gifts.filter(g=>g.rarity===rar);let g=rand(pool.length?pool:data.gifts);g.owned++;a.push(g.name)}$("result").innerHTML="<b>召喚結果</b><br>"+a.join("、");save();toast("召喚完了！")}
+function tab(id){document.querySelectorAll(".editor").forEach(x=>x.style.display="none");$(id).style.display="block"}
+function renderEditors(){
+$("ce").innerHTML=`<h3>キャラクター</h3><label>名前</label><input id="en" value="${esc(data.character.name)}"><label>親密度</label><input id="el" type="number" min="0" max="100" value="${data.character.love}">${Object.entries(data.character.lines).map(([k,v])=>`<label>${k}の台詞（1行1個）</label><textarea id="l_${k}" rows="4">${esc(v.join("\\n"))}</textarea>`).join("")}<label>立ち絵画像</label><input id="charImg" type="file" accept="image/*"><p class="hint">画像は端末内に保存する方式を次の拡張で実装できます。現在はプレースホルダー表示です。</p><button class="btn" onclick="saveChar()">保存</button>`;
+$("ge").innerHTML=`<h3>贈り物</h3>${data.gifts.map(g=>`<div class="card"><b>${g.icon} ${esc(g.name)}</b><label>所持数</label><input id="o_${g.id}" type="number" min="0" value="${g.owned}"><label>通常反応</label><input id="n_${g.id}" value="${esc(g.normal)}"><label>好き</label><input id="l_${g.id}" value="${esc(g.love)}"><label>大好物</label><input id="g_${g.id}" value="${esc(g.great)}"><label>親密度</label><input id="f_${g.id}" type="number" value="${g.fav}"></div>`).join("")}<button class="btn" onclick="saveGifts()">保存</button>`;
+$("oe").innerHTML=`<h3>衣装</h3>${data.outfits.map(o=>`<div class="card"><label>衣装名</label><input id="out_${o.id}" value="${esc(o.name)}"><div class="small">${o.rarity} / ${o.owned?"所持":"未所持"}</div><label>衣装画像</label><input type="file" accept="image/*"></div>`).join("")}<button class="btn" onclick="saveOutfits()">保存</button><p class="hint">衣装画像の端末内保存は次の画像管理アップデートで対応します。</p>`;
+$("qa").innerHTML=`<h3>ガチャ</h3><label>ガチャ名</label><input id="qname" value="${esc(data.gacha.name)}"><button class="btn" onclick="data.gacha.name=$('qname').value;save();toast('保存したよ')">保存</button>`;
+$("io").innerHTML=`<h3>データ</h3><p class="hint">台詞・親密度・贈り物・衣装・ガチャ設定をJSONとして保存／復元できます。</p><button class="btn" onclick="exportJSON()">JSON書き出し</button> <button class="btn alt" onclick="$('importFile').click()">JSON読み込み</button><input id="importFile" type="file" accept=".json,application/json" hidden onchange="importJSON(this)"><hr class="sep"><button class="btn" onclick="exportZip()">ゲームデータZIP</button><p class="hint">このHTML、PWA設定、現在のゲームデータをまとめたZIPを作ります。</p><hr class="sep"><button class="btn alt" onclick="installGuide()">iPhoneへの追加方法</button>`;
+}
+function saveChar(){data.character.name=$("en").value;data.character.love=Number($("el").value);for(const k of Object.keys(data.character.lines))data.character.lines[k]=$("l_"+k).value.split("\\n").map(s=>s.trim()).filter(Boolean);save();toast("キャラ設定を保存したよ")}
+function saveGifts(){for(const g of data.gifts){g.owned=Number($("o_"+g.id).value);g.normal=$("n_"+g.id).value;g.love=$("l_"+g.id).value;g.great=$("g_"+g.id).value;g.fav=Number($("f_"+g.id).value)}save();toast("贈り物設定を保存したよ")}
+function saveOutfits(){for(const o of data.outfits)o.name=$("out_"+o.id).value;save();toast("衣装設定を保存したよ")}
+function download(name,blob){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportJSON(){download("hanagasumi-data.json",new Blob([JSON.stringify(data,null,2)],{type:"application/json"}))}
+function importJSON(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{data=JSON.parse(r.result);save();toast("読み込んだよ")}catch(e){toast("JSONを読み込めなかったよ")}};r.readAsText(f)}
+function installGuide(){showModal(`<h3>iPhoneでアプリ化する方法</h3><p>1. このゲームをWeb上のURLで開く<br>2. Safariの共有ボタンを押す<br>3. 「ホーム画面に追加」を選ぶ<br>4. 「花霞」を追加する</p><p class="hint">ホーム画面から起動すると、アプリに近い表示になります。</p>`)}
+function showModal(x){$("modalBody").innerHTML=x;$("modal").classList.add("show")}function closeModal(){$("modal").classList.remove("show")}
+// Simple ZIP writer: no external libraries.
+function crc32(b){let c=-1;for(let x of b){c^=x;for(let i=0;i<8;i++)c=(c>>>1)^(-(c&1)&0xedb88320)}return(c^-1)>>>0}
+function u16(n){return[n&255,n>>>8&255]}function u32(n){return[n&255,n>>>8&255,n>>>16&255,n>>>24&255]}
+function zipStore(files){const enc=new TextEncoder(),local=[],central=[];let off=0;for(const f of files){const nb=enc.encode(f.name),db=enc.encode(f.data),c=crc32(db),h=new Uint8Array([80,75,3,4,20,0,0,0,0,0,0,0,...u16(0),...u16(0),...u32(c),...u32(db.length),...u32(db.length),...u16(nb.length),0,0,...nb]);local.push(h,db);central.push(new Uint8Array([80,75,1,2,20,0,20,0,0,0,0,0,0,0,...u16(0),...u16(0),...u32(c),...u32(db.length),...u32(db.length),...u16(nb.length),0,0,0,0,0,0,0,0,...u32(off),...nb]));off+=h.length+db.length}const cd=central.reduce((n,x)=>n+x.length,0),end=new Uint8Array([80,75,5,6,0,0,0,0,...u16(files.length),...u16(files.length),...u32(cd),...u32(off),0,0]);return new Blob([...local,...central,end],{type:"application/zip"})}
+function exportZip(){const files=[{name:"index.html",data:document.documentElement.outerHTML},{name:"manifest.webmanifest",data:JSON.stringify(manifest,null,2)},{name:"hanagasumi-data.json",data:JSON.stringify(data,null,2)},{name:"README.txt",data:"花霞 PWA 試作\\nSafariでWeb上に配置して開き、共有→ホーム画面に追加でアプリ風に起動できます。\\n"}];download("hanagasumi-pwa.zip",zipStore(files))}
+const manifest={name:"花霞",short_name:"花霞",start_url:"./",display:"standalone",background_color:"#f8f0de",theme_color:"#8f3438",lang:"ja"};
+render();
+</script>
+</body></html>

@@ -1,0 +1,119 @@
+{
+  "character": {
+    "name": "綾乃",
+    "love": 12,
+    "lines": {
+      "head": [
+        "髪、触るの好きなの？",
+        "……くすぐったいよ。",
+        "また頭を撫でてる。"
+      ],
+      "face": [
+        "そんなに顔を見る？",
+        "……近いよ。",
+        "楽しそうだね。"
+      ],
+      "hand": [
+        "手、繋ぎたいの？",
+        "……しょうがないな。",
+        "どうしたの？"
+      ],
+      "body": [
+        "そこはつつくところじゃないよ。",
+        "ふふ、元気だね。",
+        "今日はご機嫌だね."
+      ]
+    }
+  },
+  "gifts": [
+    {
+      "id": "onigiri",
+      "name": "おにぎり",
+      "icon": "🍙",
+      "rarity": "R",
+      "fav": 8,
+      "normal": "お、これ好きなんだよね。",
+      "love": "具は何かな？",
+      "great": "君が握ってくれたの？",
+      "owned": 3
+    },
+    {
+      "id": "apple",
+      "name": "りんご飴",
+      "icon": "🍎",
+      "rarity": "SR",
+      "fav": 12,
+      "normal": "お祭りのやつだね。",
+      "love": "……これ、好き。",
+      "great": "これを選んでくれたの？",
+      "owned": 2
+    },
+    {
+      "id": "matcha",
+      "name": "抹茶",
+      "icon": "🍵",
+      "rarity": "N",
+      "fav": 3,
+      "normal": "渋いの選ぶね。",
+      "love": "落ち着く味だね。",
+      "great": "こういうの、覚えててくれたんだ。",
+      "owned": 5
+    },
+    {
+      "id": "dango",
+      "name": "月見団子",
+      "icon": "🍡",
+      "rarity": "R",
+      "fav": 7,
+      "normal": "ひとつ食べる？",
+      "love": "月がきれいな夜に食べたいね。",
+      "great": "一緒に食べよう。",
+      "owned": 1
+    },
+    {
+      "id": "ramune",
+      "name": "ラムネ",
+      "icon": "🫧",
+      "rarity": "SR",
+      "fav": 10,
+      "normal": "懐かしいな。",
+      "love": "祭りって感じがする。",
+      "great": "……一緒に飲む？",
+      "owned": 0
+    },
+    {
+      "id": "firework",
+      "name": "花火",
+      "icon": "🎆",
+      "rarity": "SSR",
+      "fav": 20,
+      "normal": "きれいだね。",
+      "love": "夜空に咲く花みたい。",
+      "great": "……君と見たかった。",
+      "owned": 0
+    }
+  ],
+  "outfits": [
+    {
+      "id": "default",
+      "name": "通常衣装",
+      "rarity": "N",
+      "owned": true
+    },
+    {
+      "id": "summer",
+      "name": "夏祭りの浴衣",
+      "rarity": "SR",
+      "owned": false
+    },
+    {
+      "id": "formal",
+      "name": "月夜の晴れ着",
+      "rarity": "SSR",
+      "owned": false
+    }
+  ],
+  "gacha": {
+    "name": "夏祭り・百花繚乱"
+  }
+}
