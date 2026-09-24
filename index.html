@@ -79,8 +79,17 @@ function makeCharacter(name="新しいキャラクター"){
 }
 function migrate(){
  const fresh=JSON.parse(JSON.stringify(seed));
- let current=JSON.parse(localStorage.getItem("musubidokoro-v6")||"null");
+ let current=JSON.parse(localStorage.getItem("musubidokoro-v7")||"null");
  if(current&&Array.isArray(current.characters))return current;
+ current=JSON.parse(localStorage.getItem("musubidokoro-v6")||"null");
+ if(current&&Array.isArray(current.characters)){
+   current.characters=current.characters.filter(c=>c.name!=="綾乃");
+   if(!current.characters.length){const c=makeCharacter();current.characters=[c];current.activeCharacterId=c.id}
+   if(!current.characters.some(c=>c.id===current.activeCharacterId))current.activeCharacterId=current.characters[0].id;
+   current.images=current.images||{gifts:{},outfits:{}}; current.images.gifts=current.images.gifts||{}; current.images.outfits=current.images.outfits||{};
+   localStorage.setItem("musubidokoro-v7",JSON.stringify(current));
+   return current;
+ }
  let source=JSON.parse(localStorage.getItem("musubidokoro-v5")||"null");
  if(!source) source=JSON.parse(localStorage.getItem("hanagasumi-v2")||"null");
  if(source){
@@ -95,7 +104,7 @@ function migrate(){
  if(!fresh.characters.length){const c=makeCharacter();fresh.characters=[c];fresh.activeCharacterId=c.id}
  if(!fresh.characters.some(c=>c.id===fresh.activeCharacterId))fresh.activeCharacterId=fresh.characters[0].id;
  fresh.images=fresh.images||{};fresh.images.gifts=fresh.images.gifts||{};fresh.images.outfits=fresh.images.outfits||{};fresh.images.characters=fresh.images.characters||{};
- localStorage.setItem("musubidokoro-v6",JSON.stringify(fresh));
+ localStorage.setItem("musubidokoro-v7",JSON.stringify(fresh));
  return fresh;
 }
 let data=migrate();
@@ -103,22 +112,24 @@ let gems=Number(localStorage.getItem("hanagasumi-gems")||1200);
 let currentTab="ce";
 const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function activeChar(){return data.characters.find(c=>c.id===data.activeCharacterId)||data.characters[0]}
-function save(){localStorage.setItem("musubidokoro-v6",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems);render()}
-function saveSilent(){localStorage.setItem("musubidokoro-v6",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems)}
+function save(){localStorage.setItem("musubidokoro-v7",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems);render()}
+function saveSilent(){localStorage.setItem("musubidokoro-v7",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems)}
 function go(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));$(id).classList.add("active")}
 function toast(t){$("toast").textContent=t;$("toast").style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").style.display="none",1500)}
 function rand(a){return a&&a.length?a[Math.floor(Math.random()*a.length)]:"……"}
 
-const IMAGE_DB="musubidokoro-images-v2";
+const IMAGE_DB="musubidokoro-images-v3";
 let imageCache={chars:{},gifts:{},outfits:{}};
-function localImageKey(kind,id){return "musubidokoro-image-"+kind+":"+id}
+const imageObjectUrls=[];
 function openImageDB(){return new Promise((resolve,reject)=>{try{const r=indexedDB.open(IMAGE_DB,1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains("images"))db.createObjectStore("images")};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
+function makeImageUrl(v){if(!v)return "";if(typeof v==="string")return v;if(v instanceof Blob){const u=URL.createObjectURL(v);imageObjectUrls.push(u);return u}return ""}
 async function putImage(key,value){
- try{const db=await openImageDB();await new Promise((resolve,reject)=>{const tx=db.transaction("images","readwrite");tx.objectStore("images").put(value,key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}catch(e){console.warn("IndexedDB save failed",e)}
- try{localStorage.setItem("musubidokoro-image-"+key,value)}catch(e){console.warn("local image fallback save failed",e)}
+ // v7: IndexedDBにはBlobをそのまま保存。iPhone写真(HEIC/HEIF)をdata URL→canvasに通すと失敗しやすいため、元ファイルを保持する。
+ try{const db=await openImageDB();await new Promise((resolve,reject)=>{const tx=db.transaction("images","readwrite");tx.objectStore("images").put(value,key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();return true}catch(e){console.warn("IndexedDB save failed",e);return false}
 }
 async function getImage(key){
- try{const db=await openImageDB();const v=await new Promise((resolve,reject)=>{const tx=db.transaction("images","readonly");const r=tx.objectStore("images").get(key);r.onsuccess=()=>resolve(r.result||"");r.onerror=()=>reject(r.error)});db.close();if(v)return v}catch(e){}
+ try{const db=await openImageDB();const v=await new Promise((resolve,reject)=>{const tx=db.transaction("images","readonly");const r=tx.objectStore("images").get(key);r.onsuccess=()=>resolve(r.result||"");r.onerror=()=>reject(r.error)});db.close();if(v)return makeImageUrl(v)}catch(e){}
+ // v7以前のdata URLも読み込めるようにする
  try{return localStorage.getItem("musubidokoro-image-"+key)||""}catch(e){return ""}
 }
 async function deleteImage(key){try{const db=await openImageDB();await new Promise((resolve,reject)=>{const tx=db.transaction("images","readwrite");tx.objectStore("images").delete(key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}catch(e){}try{localStorage.removeItem("musubidokoro-image-"+key)}catch(e){}}
@@ -131,8 +142,16 @@ function avatarTransform(p){return `translate(calc(-50% + ${Number(p?.x)||0}%),c
 function setAvatar(){const c=activeChar(),box=$("char");box.innerHTML="";if(!c)return;const img=imageCache.chars[c.id];if(img){const im=document.createElement("img");im.className="avatar";im.src=img;im.style.transform=avatarTransform(c.image);box.appendChild(im)}
  for(const z of c.zones){const b=document.createElement("button");b.className="zone";b.dataset.zone=z.id;b.setAttribute("aria-label",z.label);b.title=z.label;b.style.left=z.x+"%";b.style.top=z.y+"%";b.style.width=z.w+"%";b.style.height=z.h+"%";b.onclick=()=>tapZone(z.id);box.appendChild(b)} }
 function tapZone(id){const c=activeChar(),z=c?.zones.find(x=>x.id===id);$("line").textContent=rand(z?.lines||["……"]);$("char").classList.add("blink");setTimeout(()=>$("char").classList.remove("blink"),170)}
-function fileToImage(input,callback){const f=input.files?.[0];if(!f)return;readImage(f).then(async x=>{await callback(x);toast("画像を保存したよ");render()}).catch(e=>{console.error(e);toast("画像を読み込めなかったよ")})}
-function readImage(file,max=1000){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));const ctx=c.getContext("2d");ctx.drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL("image/webp",.78))};img.onerror=reject;img.src=r.result};r.onerror=reject;r.readAsDataURL(file)})}
+async function fileToImage(input,callback){const f=input.files?.[0];if(!f)return;try{const blob=await readImageBlob(f);const url=makeImageUrl(blob);if(!url)throw new Error("画像URLを作れませんでした");await callback(url,blob);toast("画像を保存したよ");render()}catch(e){console.error("image load failed",e,f?.name,f?.type,e?.message);toast("この画像形式は読み込めなかったよ。写真アプリでJPEG/PNGにしてから、もう一度選んでみて")}}
+function readImageBlob(file,max=1400){return new Promise((resolve,reject)=>{
+ const type=(file.type||"").toLowerCase(),name=(file.name||"").toLowerCase();
+ // iPhoneの写真で多いHEIC/HEIFはcanvas変換をしない。Safari 17+はHEICを<img>で表示できるので元Blobを保存する。
+ if(type==="image/heic"||type==="image/heif"||name.endsWith(".heic")||name.endsWith(".heif")){resolve(file);return}
+ const url=URL.createObjectURL(file);
+ const img=new Image();
+ img.onload=()=>{try{const scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));const w=Math.max(1,Math.round((img.naturalWidth||img.width)*scale)),h=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));const c=document.createElement("canvas");c.width=w;c.height=h;const ctx=c.getContext("2d");ctx.drawImage(img,0,0,w,h);c.toBlob(b=>{URL.revokeObjectURL(url);b?resolve(b):reject(new Error("canvas toBlob failed"))},"image/webp",.82)}catch(e){URL.revokeObjectURL(url);reject(e)}};
+ img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Image decode failed"))};img.src=url;
+ })}
 function renderSwitcher(){const sel=$("charSwitcher");sel.innerHTML=data.characters.map(c=>`<option value="${esc(c.id)}">${esc(c.name||"名前なし")}</option>`).join("");sel.value=data.activeCharacterId;sel.onchange=()=>switchCharacter(sel.value)}
 function switchCharacter(id){if(!data.characters.some(c=>c.id===id))return;data.activeCharacterId=id;saveSilent();render();const c=activeChar();$("line").textContent=rand(c.zones.find(z=>z.id==="head")?.lines||["……"]);toast(c.name+"に切り替えたよ")}
 function render(){const c=activeChar();if(!c)return;$("name").textContent=c.name||"名前なし";setAvatar();$("meter").style.width=Math.min(100,c.love||0)+"%";$("love").textContent=`親密度 ${c.love||0} / 100`;$("gems").textContent=gems;$("count").textContent=data.gifts.reduce((s,g)=>s+g.owned,0);$("gachaName").textContent=data.gacha.name;renderSwitcher();renderGifts();renderOutfits();renderEditors();tab(currentTab)}
@@ -145,10 +164,10 @@ function tab(id){currentTab=id;document.querySelectorAll(".editor").forEach(x=>x
 function imagePreviewHtml(c){const img=imageCache.chars[c.id],p=c.image||{scale:1,x:0,y:0};return `<div class="preview-card"><div class="preview-title">画像配置プレビュー</div><div class="image-stage" id="imagePreview">${img?`<img src="${img}" style="transform:${avatarTransform(p)}">`:`<div class="empty-preview">まだ画像がありません<br>下の「立ち絵画像」から選択してね</div>`}</div><div class="preview-note">スライダーを動かすと、このプレビューもその場で変わります。</div></div>`}
 function renderEditors(){
  const c=activeChar();
- $("ce").innerHTML=`<h3>キャラクター</h3><label>現在のキャラクター</label><select id="editCharSelect" onchange="switchCharacter(this.value)">${data.characters.map(x=>`<option value="${esc(x.id)}" ${x.id===c.id?"selected":""}>${esc(x.name||"名前なし")}</option>`).join("")}</select><div class="editor-actions"><button class="btn" onclick="addCharacter()">＋キャラクター追加</button>${data.characters.length>1?`<button class="btn alt" onclick="removeCharacter()">現在のキャラを削除</button>`:""}</div><hr class="sep"><label>名前</label><input id="en" value="${esc(c.name)}"><label>親密度</label><input id="el" type="number" min="0" max="100" value="${c.love}"><label>立ち絵画像</label><input id="charImg" type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.chars[c.id]=x;await putImage('char:'+c.id,x)})"><p class="hint">画像はこのブラウザにだけ保存されます。別の端末やブラウザには共有されません。</p>${imagePreviewHtml(c)}<label>画像サイズ：<span id="scaleVal">${Math.round((c.image?.scale||1)*100)}%</span></label><input type="range" min="50" max="200" step="1" value="${Math.round((c.image?.scale||1)*100)}" oninput="setImageSetting('scale',Number(this.value)/100);$('scaleVal').textContent=this.value+'%'"/><label>画像の左右位置：<span id="xVal">${c.image?.x||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.x||0}" oninput="setImageSetting('x',Number(this.value));$('xVal').textContent=this.value+'%'"/><label>画像の上下位置：<span id="yVal">${c.image?.y||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.y||0}" oninput="setImageSetting('y',Number(this.value));$('yVal').textContent=this.value+'%'"/><p class="hint">実際のホーム画面と同じ基準で拡大・縮小・位置調整できます。</p><hr class="sep">${c.zones.map(z=>`<label>${esc(z.label)}の台詞（1行1個）</label><textarea id="l_${z.id}" rows="4">${esc(z.lines.join("\n"))}</textarea>`).join("")}<button class="btn" onclick="saveChar()">キャラクター設定を保存</button>`;
+ $("ce").innerHTML=`<h3>キャラクター</h3><label>現在のキャラクター</label><select id="editCharSelect" onchange="switchCharacter(this.value)">${data.characters.map(x=>`<option value="${esc(x.id)}" ${x.id===c.id?"selected":""}>${esc(x.name||"名前なし")}</option>`).join("")}</select><div class="editor-actions"><button class="btn" onclick="addCharacter()">＋キャラクター追加</button>${data.characters.length>1?`<button class="btn alt" onclick="removeCharacter()">現在のキャラを削除</button>`:""}</div><hr class="sep"><label>名前</label><input id="en" value="${esc(c.name)}"><label>親密度</label><input id="el" type="number" min="0" max="100" value="${c.love}"><label>立ち絵画像</label><input id="charImg" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToImage(this,async (x,blob)=>{imageCache.chars[c.id]=x;await putImage('char:'+c.id,blob)})"><p class="hint">画像はこのブラウザにだけ保存されます。iPhoneの写真（HEIC）もそのまま保存できます。別の端末やブラウザには共有されません。</p>${imagePreviewHtml(c)}<label>画像サイズ：<span id="scaleVal">${Math.round((c.image?.scale||1)*100)}%</span></label><input type="range" min="50" max="200" step="1" value="${Math.round((c.image?.scale||1)*100)}" oninput="setImageSetting('scale',Number(this.value)/100);$('scaleVal').textContent=this.value+'%'"/><label>画像の左右位置：<span id="xVal">${c.image?.x||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.x||0}" oninput="setImageSetting('x',Number(this.value));$('xVal').textContent=this.value+'%'"/><label>画像の上下位置：<span id="yVal">${c.image?.y||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.y||0}" oninput="setImageSetting('y',Number(this.value));$('yVal').textContent=this.value+'%'"/><p class="hint">実際のホーム画面と同じ基準で拡大・縮小・位置調整できます。</p><hr class="sep">${c.zones.map(z=>`<label>${esc(z.label)}の台詞（1行1個）</label><textarea id="l_${z.id}" rows="4">${esc(z.lines.join("\n"))}</textarea>`).join("")}<button class="btn" onclick="saveChar()">キャラクター設定を保存</button>`;
  $("hit").innerHTML=`<h3>つつく位置・当たり判定</h3><p class="hint">赤い枠が「つつける場所」です。下のプレビューを見ながら、左・上・幅・高さを調整できます。</p>${hitPreviewHtml()}${c.zones.map(z=>zoneControlHtml(z)).join("")}<button class="btn" onclick="saveHitboxes()">当たり判定と台詞を保存</button>`;
- $("ge").innerHTML=`<h3>贈り物</h3>${data.gifts.map(g=>`<div class="card"><b>${g.icon} ${esc(g.name)}</b><label>所持数</label><input id="o_${g.id}" type="number" min="0" value="${g.owned}"><label>通常反応</label><input id="n_${g.id}" value="${esc(g.normal)}"><label>好き</label><input id="l_${g.id}" value="${esc(g.love)}"><label>大好物</label><input id="g_${g.id}" value="${esc(g.great)}"><label>親密度</label><input id="f_${g.id}" type="number" value="${g.fav}"><label>アイテム画像</label><input type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.gifts[g.id]=x;await putImage('gift:'+g.id,x)})"></div>`).join("")}<button class="btn" onclick="saveGifts()">保存</button><hr class="sep"><h4>新しい贈り物を追加</h4><label>名前</label><input id="newGiftName" placeholder="例：わたあめ"><label>絵文字（画像なし時の表示）</label><input id="newGiftIcon" value="🎁"><label>レアリティ</label><select id="newGiftRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select><button class="btn alt" onclick="addGift()">贈り物を追加</button>`;
- $("oe").innerHTML=`<h3>衣装</h3>${data.outfits.map(o=>`<div class="card"><label>衣装名</label><input id="out_${o.id}" value="${esc(o.name)}"><div class="small">${o.rarity} / ${o.owned?"所持":"未所持"}</div><label>衣装画像</label><input type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.outfits[o.id]=x;await putImage('outfit:'+o.id,x)})"></div>`).join("")}<button class="btn" onclick="saveOutfits()">保存</button><hr class="sep"><h4>新しい衣装を追加</h4><label>衣装名</label><input id="newOutfitName" placeholder="例：藤の花の着物"><label>レアリティ</label><select id="newOutfitRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select><button class="btn alt" onclick="addOutfit()">衣装を追加</button>`;
+ $("ge").innerHTML=`<h3>贈り物</h3>${data.gifts.map(g=>`<div class="card"><b>${g.icon} ${esc(g.name)}</b><label>所持数</label><input id="o_${g.id}" type="number" min="0" value="${g.owned}"><label>通常反応</label><input id="n_${g.id}" value="${esc(g.normal)}"><label>好き</label><input id="l_${g.id}" value="${esc(g.love)}"><label>大好物</label><input id="g_${g.id}" value="${esc(g.great)}"><label>親密度</label><input id="f_${g.id}" type="number" value="${g.fav}"><label>アイテム画像</label><input type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToImage(this,async (x,blob)=>{imageCache.gifts[g.id]=x;await putImage('gift:'+g.id,blob)})"></div>`).join("")}<button class="btn" onclick="saveGifts()">保存</button><hr class="sep"><h4>新しい贈り物を追加</h4><label>名前</label><input id="newGiftName" placeholder="例：わたあめ"><label>絵文字（画像なし時の表示）</label><input id="newGiftIcon" value="🎁"><label>レアリティ</label><select id="newGiftRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select><button class="btn alt" onclick="addGift()">贈り物を追加</button>`;
+ $("oe").innerHTML=`<h3>衣装</h3>${data.outfits.map(o=>`<div class="card"><label>衣装名</label><input id="out_${o.id}" value="${esc(o.name)}"><div class="small">${o.rarity} / ${o.owned?"所持":"未所持"}</div><label>衣装画像</label><input type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToImage(this,async (x,blob)=>{imageCache.outfits[o.id]=x;await putImage('outfit:'+o.id,blob)})"></div>`).join("")}<button class="btn" onclick="saveOutfits()">保存</button><hr class="sep"><h4>新しい衣装を追加</h4><label>衣装名</label><input id="newOutfitName" placeholder="例：藤の花の着物"><label>レアリティ</label><select id="newOutfitRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select><button class="btn alt" onclick="addOutfit()">衣装を追加</button>`;
  $("qa").innerHTML=`<h3>ガチャ</h3><label>ガチャ名</label><input id="qname" value="${esc(data.gacha.name)}"><button class="btn" onclick="data.gacha.name=$('qname').value;save();toast('保存したよ')">保存</button>`;
  $("io").innerHTML=`<h3>データ</h3><p class="hint">キャラクター・当たり判定・台詞・親密度・贈り物・衣装・ガチャ設定をJSONとして保存／復元できます。画像はブラウザ内に別保存されます。</p><button class="btn" onclick="exportJSON()">JSON書き出し</button> <button class="btn alt" onclick="$('importFile').click()">JSON読み込み</button><input id="importFile" type="file" accept=".json,application/json" hidden onchange="importJSON(this)"><hr class="sep"><button class="btn" onclick="exportZip()">ゲームデータZIP</button><p class="hint">このHTML、PWA設定、現在のゲームデータをまとめたZIPを作ります。</p><hr class="sep"><button class="btn alt" onclick="resetProject()">むすびどころのデータを初期化</button>`;
 }
@@ -170,7 +189,7 @@ function addOutfit(){const name=$("newOutfitName").value.trim();if(!name)return 
 function download(name,blob){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function exportJSON(){download("musubidokoro-data.json",new Blob([JSON.stringify(data,null,2)],{type:"application/json"}))}
 function importJSON(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.characters))throw new Error("old format");data=x;data.images=data.images||{gifts:{},outfits:{}};data.images.gifts=data.images.gifts||{};data.images.outfits=data.images.outfits||{};save();toast("読み込んだよ")}catch(e){toast("このJSONは新しい形式じゃないよ")}};r.readAsText(f)}
-function resetProject(){if(!confirm("ゲームデータを初期化して、キャラクターを空の状態に戻す？"))return;localStorage.removeItem("musubidokoro-v6");location.reload()}
+function resetProject(){if(!confirm("ゲームデータを初期化して、キャラクターを空の状態に戻す？"))return;localStorage.removeItem("musubidokoro-v7");location.reload()}
 function installGuide(){showModal(`<h3>iPhoneでアプリ化する方法</h3><p>1. このゲームをWeb上のURLで開く<br>2. Safariの共有ボタンを押す<br>3. 「ホーム画面に追加」を選ぶ<br>4. 「むすびどころ」を追加する</p>`)}
 function showModal(x){$("modalBody").innerHTML=x;$("modal").classList.add("show")}function closeModal(){$("modal").classList.remove("show")}
 function crc32(b){let c=-1;for(let x of b){c^=x;for(let i=0;i<8;i++)c=(c>>>1)^(-(c&1)&0xedb88320)}return(c^-1)>>>0}
