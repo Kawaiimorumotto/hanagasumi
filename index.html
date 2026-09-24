@@ -29,7 +29,7 @@ header{height:58px;display:grid;grid-template-columns:auto minmax(88px,1fr) auto
 .gacha-banner{height:215px;border-radius:15px;background:linear-gradient(145deg,#652a37,#b8874d 57%,#f0ddb1);color:#fff9ec;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:0 12px 30px #43212640;margin-bottom:13px}.gacha-banner h3{font-size:27px;margin:5px}.result{line-height:1.8}
 .char-preview{height:300px;display:flex;align-items:center;justify-content:center}.char.smallchar{width:160px;height:270px}
 label{display:block;font-size:12px;margin:9px 0 5px}input,textarea,select{width:100%;background:#fffdf8;border:1px solid var(--line);border-radius:7px;padding:8px;color:#332927}textarea{resize:vertical}.tabs{display:flex;gap:6px;overflow:auto;padding-bottom:5px}.tabs button{white-space:nowrap}.editor{margin-top:10px}.hint{font-size:11px;color:var(--muted);line-height:1.55}.sep{border:0;border-top:1px solid #ddceb2;margin:14px 0}
-.bg-preview{position:relative;width:100%;height:260px;border-radius:10px;background-position:center;background-size:cover;background-repeat:no-repeat;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#8f3438;text-align:center;font-weight:bold;letter-spacing:.08em}.bg-preview:after{content:"";position:absolute;inset:0;background:#fffaf01c;pointer-events:none}.bg-preview>div{position:relative;z-index:1;background:#fffaf0d9;border:1px solid #ddceb2;border-radius:10px;padding:10px 14px}.bg-preview small{font-size:9px;font-weight:normal;letter-spacing:0}.modal{display:none;position:fixed;inset:0;background:#1d1614aa;z-index:40;align-items:flex-end}.modal.show{display:flex}.modalbox{width:min(520px,100%);max-height:88dvh;overflow:auto;background:var(--paper);border-radius:18px 18px 0 0;padding:16px}.toast{display:none;position:fixed;z-index:50;left:50%;bottom:86px;transform:translateX(-50%);background:#2d2421;color:white;padding:9px 14px;border-radius:99px;font-size:12px}
+.bg-preview{position:relative;width:100%;height:260px;border-radius:10px;background-position:center;background-size:cover;background-repeat:no-repeat;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#8f3438;text-align:center;font-weight:bold;letter-spacing:.08em}.bg-remove-card{background:#fffaf0;border:1px solid #ddceb2;border-radius:10px;padding:10px;margin:10px 0}.bg-remove-card .row{align-items:center}.range-readout{font-size:11px;color:#806f61;min-width:42px;text-align:right}.bg-preview:after{content:"";position:absolute;inset:0;background:#fffaf01c;pointer-events:none}.bg-preview>div{position:relative;z-index:1;background:#fffaf0d9;border:1px solid #ddceb2;border-radius:10px;padding:10px 14px}.bg-preview small{font-size:9px;font-weight:normal;letter-spacing:0}.modal{display:none;position:fixed;inset:0;background:#1d1614aa;z-index:40;align-items:flex-end}.modal.show{display:flex}.modalbox{width:min(520px,100%);max-height:88dvh;overflow:auto;background:var(--paper);border-radius:18px 18px 0 0;padding:16px}.toast{display:none;position:fixed;z-index:50;left:50%;bottom:86px;transform:translateX(-50%);background:#2d2421;color:white;padding:9px 14px;border-radius:99px;font-size:12px}
 </style>
 </head>
 <body>
@@ -66,10 +66,10 @@ outfits:[{id:"default",name:"通常衣装",rarity:"N",owned:true},{id:"summer",n
 gacha:{name:"夏祭り・百花繚乱"},images:{gifts:{},outfits:{}}};
 
 const zoneDefaults=[
-{id:"head",label:"頭",x:10,y:6,w:80,h:26,lines:["髪、触るの好きなの？","……くすぐったいよ。","また頭を撫でてる。"]},
-{id:"face",label:"顔",x:25,y:18,w:50,h:20,lines:["そんなに顔を見る？","……近いよ。","楽しそうだね。"]},
-{id:"hand",label:"手",x:5,y:42,w:35,h:28,lines:["手、繋ぎたいの？","……しょうがないな。","どうしたの？"]},
-{id:"body",label:"身体",x:27,y:40,w:55,h:40,lines:["そこはつつくところじゃないよ。","ふふ、元気だね。","今日はご機嫌だね。"]}
+{id:"head",label:"頭",x:10,y:6,w:80,h:26,lines:["髪、触るの好きなの？","……くすぐったいよ。","また頭を撫でてる。"],spamCount:5,spamLines:["……ちょっと、つつきすぎじゃない？"]},
+{id:"face",label:"顔",x:25,y:18,w:50,h:20,lines:["そんなに顔を見る？","……近いよ。","楽しそうだね。"],spamCount:5,spamLines:["そんなに顔ばかりつつかないでよ。"]},
+{id:"hand",label:"手",x:5,y:42,w:35,h:28,lines:["手、繋ぎたいの？","……しょうがないな。","どうしたの？"],spamCount:5,spamLines:["……手ばかりつつくの、好きなの？"]},
+{id:"body",label:"身体",x:27,y:40,w:55,h:40,lines:["そこはつつくところじゃないよ。","ふふ、元気だね。","今日はご機嫌だね。"],spamCount:5,spamLines:["……もう、つつきすぎだよ。"]}
 ];
 function makeCharacter(name="新しいキャラクター"){
  const id="char_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
@@ -109,7 +109,8 @@ let data=migrate();
 let gems=Number(localStorage.getItem("hanagasumi-gems")||1200);
 let currentTab="ce";
 const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function activeChar(){return data.characters.find(c=>c.id===data.activeCharacterId)||data.characters[0]}
+function normalizeZones(c){if(!c||!Array.isArray(c.zones))return;c.zones.forEach(z=>{z.spamCount=Math.max(1,Number(z.spamCount)||5);if(!Array.isArray(z.spamLines))z.spamLines=["……ちょっと、つつきすぎじゃない？"];if(!Array.isArray(z.lines))z.lines=[]})}
+function activeChar(){const c=data.characters.find(c=>c.id===data.activeCharacterId)||data.characters[0];normalizeZones(c);return c}
 function save(){localStorage.setItem("musubidokoro-v7",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems);render()}
 function saveSilent(){localStorage.setItem("musubidokoro-v7",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems)}
 function go(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));$(id).classList.add("active")}
@@ -140,9 +141,50 @@ async function loadImages(){
 }
 function avatarTransform(p){return `translate(calc(-50% + ${Number(p?.x)||0}%),calc(-50% + ${Number(p?.y)||0}%)) scale(${Number(p?.scale)||1})`}
 function setHomeBackground(){const home=$("home");if(!home)return;if(imageCache.background)home.style.backgroundImage=`url("${imageCache.background}")`;else home.style.backgroundImage='url("./festival-bg.png")'}
-function setAvatar(){const c=activeChar(),box=$("char");box.innerHTML="";if(!c)return;const img=imageCache.chars[c.id];if(img){const im=document.createElement("img");im.className="avatar";im.src=img;im.style.transform=avatarTransform(c.image);box.appendChild(im)}
- for(const z of c.zones){const b=document.createElement("button");b.className="zone";b.dataset.zone=z.id;b.setAttribute("aria-label",z.label);b.title=z.label;b.style.left=z.x+"%";b.style.top=z.y+"%";b.style.width=z.w+"%";b.style.height=z.h+"%";b.onclick=()=>tapZone(z.id);box.appendChild(b)} }
-function tapZone(id){const c=activeChar(),z=c?.zones.find(x=>x.id===id);$("line").textContent=rand(z?.lines||["……"]);$("char").classList.add("blink");setTimeout(()=>$("char").classList.remove("blink"),170)}
+function pointToZone(charEl,clientX,clientY){
+ const r=charEl.getBoundingClientRect();
+ const x=(clientX-r.left)/r.width*100;
+ const y=(clientY-r.top)/r.height*100;
+ const c=activeChar();
+ const hits=(c?.zones||[]).filter(z=>x>=z.x&&x<=z.x+z.w&&y>=z.y&&y<=z.y+z.h);
+ hits.sort((a,b)=>(a.w*a.h)-(b.w*b.h));
+ return hits[0]||null;
+}
+function setAvatar(){
+ const c=activeChar(),box=$("char");box.innerHTML="";if(!c)return;
+ const img=imageCache.chars[c.id];
+ if(img){const im=document.createElement("img");im.className="avatar";im.src=img;im.style.transform=avatarTransform(c.image);box.appendChild(im)}
+ // ホームの当たり判定は透明ボタンを重ねず、座標から厳密に判定する。
+ box.onpointerdown=onCharacterPointer;
+}
+function onCharacterPointer(e){
+ if(e.pointerType==="mouse"&&e.button!==0)return;
+ const z=pointToZone(e.currentTarget,e.clientX,e.clientY);
+ if(z)tapZone(z.id);
+}
+function tapZone(id){
+ const c=activeChar(),z=c?.zones.find(x=>x.id===id);if(!z)return;
+ normalizeZones(c);
+ if(!c._tapState)c._tapState={zoneId:null,count:0,lineIndex:0};
+ if(c._tapState.zoneId===id){c._tapState.count++;}else{c._tapState.zoneId=id;c._tapState.count=1;c._tapState.lineIndex=0}
+ const threshold=Math.max(1,Number(z.spamCount)||5);
+ let line;
+ if(c._tapState.count>=threshold){
+   line=rand(z.spamLines?.length?z.spamLines:["……つつきすぎだよ。"]);
+   c._tapState.count=0;
+   c._tapState.lineIndex=0;
+   saveSilent();
+ }else{
+   const lines=z.lines?.length?z.lines:["……"];
+   line=lines[c._tapState.lineIndex%lines.length];
+   c._tapState.lineIndex=(c._tapState.lineIndex+1)%lines.length;
+ }
+ // pointerdownから直接変更するので、連続タップでも待ち時間なし。
+ $("line").textContent=line;
+ $("char").classList.add("blink");
+ clearTimeout(window.__blink);
+ window.__blink=setTimeout(()=>$("char").classList.remove("blink"),170);
+}
 function readFileAsDataURL(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=()=>reject(r.error||new Error("FileReader failed"));r.readAsDataURL(file)})}
 async function fileToImage(input,key,cacheType){
  const f=input.files?.[0];
@@ -205,26 +247,62 @@ function tab(id){currentTab=id;document.querySelectorAll(".editor").forEach(x=>x
 function imagePreviewHtml(c){const img=imageCache.chars[c.id],p=c.image||{scale:1,x:0,y:0};return `<div class="preview-card"><div class="preview-title">画像配置プレビュー</div><div class="image-stage" id="imagePreview">${img?`<img src="${img}" style="transform:${avatarTransform(p)}">`:`<div class="empty-preview">まだ画像がありません<br>下の「立ち絵画像」から選択してね</div>`}</div><div class="preview-note">スライダーを動かすと、このプレビューもその場で変わります。</div></div>`}
 function renderEditors(){
  const c=activeChar();
- $("ce").innerHTML=`<h3>キャラクター</h3><label>現在のキャラクター</label><select id="editCharSelect" onchange="switchCharacter(this.value)">${data.characters.map(x=>`<option value="${esc(x.id)}" ${x.id===c.id?"selected":""}>${esc(x.name||"名前なし")}</option>`).join("")}</select><div class="editor-actions"><button class="btn" onclick="addCharacter()">＋キャラクター追加</button>${data.characters.length>1?`<button class="btn alt" onclick="removeCharacter()">現在のキャラを削除</button>`:""}</div><hr class="sep"><label>名前</label><input id="en" value="${esc(c.name)}"><label>親密度</label><input id="el" type="number" min="0" max="100" value="${c.love}"><label>立ち絵画像</label><input id="charImg" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToImage(this,'char:'+activeChar().id,'chars')"><p class="hint">画像はこのブラウザにだけ保存されます。選んだ画像ファイルをそのまま保存するので、iPhoneの写真も使えます。別の端末やブラウザには共有されません。</p>${imagePreviewHtml(c)}<label>画像サイズ：<span id="scaleVal">${Math.round((c.image?.scale||1)*100)}%</span></label><input type="range" min="50" max="200" step="1" value="${Math.round((c.image?.scale||1)*100)}" oninput="setImageSetting('scale',Number(this.value)/100);$('scaleVal').textContent=this.value+'%'"/><label>画像の左右位置：<span id="xVal">${c.image?.x||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.x||0}" oninput="setImageSetting('x',Number(this.value));$('xVal').textContent=this.value+'%'"/><label>画像の上下位置：<span id="yVal">${c.image?.y||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.y||0}" oninput="setImageSetting('y',Number(this.value));$('yVal').textContent=this.value+'%'"/><p class="hint">実際のホーム画面と同じ基準で拡大・縮小・位置調整できます。</p><hr class="sep">${c.zones.map(z=>`<label>${esc(z.label)}の台詞（1行1個）</label><textarea id="l_${z.id}" rows="4">${esc(z.lines.join("\n"))}</textarea>`).join("")}<button class="btn" onclick="saveChar()">キャラクター設定を保存</button>`;
- $("hit").innerHTML=`<h3>つつく位置・当たり判定</h3><p class="hint">赤い枠が「つつける場所」です。下のプレビューを見ながら、左・上・幅・高さを調整できます。好きな場所に新しい当たり判定も追加できます。</p>${hitPreviewHtml()}<div class="card"><h4 style="margin:0 0 8px">新しい当たり判定を作る</h4><label>名前</label><input id="newZoneLabel" placeholder="例：髪飾り、肩、足元"><label>最初の位置</label><div class="small">追加後にスライダーで好きな位置へ動かせます。</div><button class="btn alt" onclick="addHitbox()" style="margin-top:8px">＋当たり判定を追加</button></div>${c.zones.map(z=>zoneControlHtml(z)).join("")}<button class="btn" onclick="saveHitboxes()">当たり判定と台詞を保存</button>`;
+ $("ce").innerHTML=`<h3>キャラクター</h3><label>現在のキャラクター</label><select id="editCharSelect" onchange="switchCharacter(this.value)">${data.characters.map(x=>`<option value="${esc(x.id)}" ${x.id===c.id?"selected":""}>${esc(x.name||"名前なし")}</option>`).join("")}</select><div class="editor-actions"><button class="btn" onclick="addCharacter()">＋キャラクター追加</button>${data.characters.length>1?`<button class="btn alt" onclick="removeCharacter()">現在のキャラを削除</button>`:""}</div><hr class="sep"><label>名前</label><input id="en" value="${esc(c.name)}"><label>親密度</label><input id="el" type="number" min="0" max="100" value="${c.love}"><label>立ち絵画像</label><input id="charImg" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToImage(this,'char:'+activeChar().id,'chars')"><p class="hint">画像はこのブラウザにだけ保存されます。選んだ画像ファイルをそのまま保存するので、iPhoneの写真も使えます。別の端末やブラウザには共有されません。</p>${imagePreviewHtml(c)}<div class="bg-remove-card"><b>立ち絵の背景を透過</b><p class="hint">今の立ち絵の「端からつながっている背景」を自動で透明にします。画像の読み込み方法そのものは変更しません。</p><div class="row"><span class="small">透過の強さ</span><span class="range-readout" id="bgRemoveVal">36</span></div><input id="bgRemoveTol" type="range" min="15" max="70" step="1" value="36" oninput="$('bgRemoveVal').textContent=this.value"><button class="btn alt" onclick="removeCharacterBackground()" style="margin-top:8px">背景を透過して保存</button></div><label>画像サイズ：<span id="scaleVal">${Math.round((c.image?.scale||1)*100)}%</span></label><input type="range" min="50" max="200" step="1" value="${Math.round((c.image?.scale||1)*100)}" oninput="setImageSetting('scale',Number(this.value)/100);$('scaleVal').textContent=this.value+'%'"/><label>画像の左右位置：<span id="xVal">${c.image?.x||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.x||0}" oninput="setImageSetting('x',Number(this.value));$('xVal').textContent=this.value+'%'"/><label>画像の上下位置：<span id="yVal">${c.image?.y||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.y||0}" oninput="setImageSetting('y',Number(this.value));$('yVal').textContent=this.value+'%'"/><p class="hint">実際のホーム画面と同じ基準で拡大・縮小・位置調整できます。</p><hr class="sep">${c.zones.map(z=>`<label>${esc(z.label)}の台詞（1行1個）</label><textarea id="l_${z.id}" rows="4">${esc(z.lines.join("\n"))}</textarea>`).join("")}<button class="btn" onclick="saveChar()">キャラクター設定を保存</button>`;
+ $("hit").innerHTML=`<h3>つつく位置・当たり判定</h3><p class="hint">赤い枠が「つつける場所」です。ホームではタップした座標を正確に判定し、判定が重なった場合は小さい範囲を優先します。別の場所をつつくと連続回数はリセットされます。</p>${hitPreviewHtml()}<div class="card"><h4 style="margin:0 0 8px">新しい当たり判定を作る</h4><label>名前</label><input id="newZoneLabel" placeholder="例：髪飾り、肩、足元"><label>最初の位置</label><div class="small">追加後にスライダーで好きな位置へ動かせます。</div><button class="btn alt" onclick="addHitbox()" style="margin-top:8px">＋当たり判定を追加</button></div>${c.zones.map(z=>zoneControlHtml(z)).join("")}<button class="btn" onclick="saveHitboxes()">当たり判定と台詞を保存</button>`;
  $("ge").innerHTML=`<h3>贈り物</h3>${data.gifts.map(g=>`<div class="card"><b>${g.icon} ${esc(g.name)}</b><label>所持数</label><input id="o_${g.id}" type="number" min="0" value="${g.owned}"><label>通常反応</label><input id="n_${g.id}" value="${esc(g.normal)}"><label>好き</label><input id="l_${g.id}" value="${esc(g.love)}"><label>大好物</label><input id="g_${g.id}" value="${esc(g.great)}"><label>親密度</label><input id="f_${g.id}" type="number" value="${g.fav}"><label>アイテム画像</label><input type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToImage(this,'gift:'+g.id,'gifts')"></div>`).join("")}<button class="btn" onclick="saveGifts()">保存</button><hr class="sep"><h4>新しい贈り物を追加</h4><label>名前</label><input id="newGiftName" placeholder="例：わたあめ"><label>絵文字（画像なし時の表示）</label><input id="newGiftIcon" value="🎁"><label>レアリティ</label><select id="newGiftRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select><button class="btn alt" onclick="addGift()">贈り物を追加</button>`;
  $("oe").innerHTML=`<h3>衣装</h3>${data.outfits.map(o=>`<div class="card"><label>衣装名</label><input id="out_${o.id}" value="${esc(o.name)}"><div class="small">${o.rarity} / ${o.owned?"所持":"未所持"}</div><label>衣装画像</label><input type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToImage(this,'outfit:'+o.id,'outfits')"></div>`).join("")}<button class="btn" onclick="saveOutfits()">保存</button><hr class="sep"><h4>新しい衣装を追加</h4><label>衣装名</label><input id="newOutfitName" placeholder="例：藤の花の着物"><label>レアリティ</label><select id="newOutfitRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select><button class="btn alt" onclick="addOutfit()">衣装を追加</button>`;
  $("qa").innerHTML=`<h3>ガチャ</h3><label>ガチャ名</label><input id="qname" value="${esc(data.gacha.name)}"><button class="btn" onclick="data.gacha.name=$('qname').value;save();toast('保存したよ')">保存</button>`;
- $("bg").innerHTML=`<h3>ホーム背景</h3><p class="hint">ホーム画面の背景画像を好きな画像に変更できます。選んだ画像はこのブラウザにだけ保存されます。</p><label>背景画像</label><input id="bgImg" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToBackground(this)"><button class="btn alt" onclick="clearBackground()" style="margin-top:8px">初期の背景に戻す</button>${backgroundPreviewHtml()}<p class="hint">背景は画面いっぱいに表示されます。キャラクター画像の読み込み方法には変更を加えていません。</p>`;
+ $("bg").innerHTML=`<h3>ホーム背景</h3><p class="hint">ホーム画面の背景画像を好きな画像に変更できます。選んだ画像はこのブラウザにだけ保存されます。</p><label>背景画像</label><input id="bgImg" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,image/*" onchange="fileToBackground(this)"><button class="btn alt" onclick="clearBackground()" style="margin-top:8px">初期の背景に戻す</button>${backgroundPreviewHtml()}<p class="hint">PNG / JPEG / WebP / HEIC / HEIFなど、好きな画像を背景に設定できます。画像はこのブラウザにだけ保存されます。キャラクター画像の読み込み方法には変更を加えていません。</p>`;
  $("io").innerHTML=`<h3>データ</h3><p class="hint">キャラクター・当たり判定・台詞・親密度・贈り物・衣装・ガチャ設定をJSONとして保存／復元できます。画像はブラウザ内に別保存されます。</p><button class="btn" onclick="exportJSON()">JSON書き出し</button> <button class="btn alt" onclick="$('importFile').click()">JSON読み込み</button><input id="importFile" type="file" accept=".json,application/json" hidden onchange="importJSON(this)"><hr class="sep"><button class="btn" onclick="exportZip()">ゲームデータZIP</button><p class="hint">このHTML、PWA設定、現在のゲームデータをまとめたZIPを作ります。</p><hr class="sep"><button class="btn alt" onclick="resetProject()">むすびどころのデータを初期化</button>`;
 }
 
 function hitPreviewHtml(){const c=activeChar(),img=imageCache.chars[c.id],p=c.image||{scale:1,x:0,y:0};return `<div class="preview-card"><div class="preview-title">当たり判定プレビュー</div><div class="hit-stage" id="hitPreview">${img?`<img src="${img}" style="transform:${avatarTransform(p)}">`:`<div class="empty-preview">キャラクター画像を設定すると<br>ここに重ねて表示されます</div>`}${c.zones.map(z=>`<div class="zone edit-zone" data-preview-zone="${z.id}" style="left:${z.x}%;top:${z.y}%;width:${z.w}%;height:${z.h}%"><b>${esc(z.label)}</b></div>`).join("")}</div><div class="preview-note">赤い枠が実際のタップ判定です。設定を動かすとすぐプレビューが更新されます。新しく作った判定もここに表示されます。</div></div>`}
-function zoneControlHtml(z){return `<div class="zone-row"><div class="row"><b>${esc(z.label)}</b><button class="btn alt" onclick="removeHitbox('${z.id}')" style="padding:5px 8px;font-size:10px">削除</button></div><label>名前</label><input value="${esc(z.label)}" oninput="renameHitbox('${z.id}',this.value)"><div class="range-line"><span>左</span><input type="range" min="0" max="100" value="${z.x}" oninput="setZone('${z.id}','x',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.x}</output></div><div class="range-line"><span>上</span><input type="range" min="0" max="100" value="${z.y}" oninput="setZone('${z.id}','y',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.y}</output></div><div class="range-line"><span>幅</span><input type="range" min="5" max="100" value="${z.w}" oninput="setZone('${z.id}','w',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.w}</output></div><div class="range-line"><span>高さ</span><input type="range" min="5" max="100" value="${z.h}" oninput="setZone('${z.id}','h',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.h}</output></div><label>この場所をつついた時の台詞</label><textarea id="hz_${z.id}" rows="3">${esc(z.lines.join("\n"))}</textarea></div>`}
+function zoneControlHtml(z){const n=Math.max(1,Math.min(99,Number(z.spamCount)||5));return `<div class="zone-row"><div class="row"><b>${esc(z.label)}</b><button class="btn alt" onclick="removeHitbox('${z.id}')" style="padding:5px 8px;font-size:10px">削除</button></div><label>名前</label><input value="${esc(z.label)}" oninput="renameHitbox('${z.id}',this.value)"><div class="range-line"><span>左</span><input type="range" min="0" max="100" value="${z.x}" oninput="setZone('${z.id}','x',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.x}</output></div><div class="range-line"><span>上</span><input type="range" min="0" max="100" value="${z.y}" oninput="setZone('${z.id}','y',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.y}</output></div><div class="range-line"><span>幅</span><input type="range" min="5" max="100" value="${z.w}" oninput="setZone('${z.id}','w',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.w}</output></div><div class="range-line"><span>高さ</span><input type="range" min="5" max="100" value="${z.h}" oninput="setZone('${z.id}','h',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.h}</output></div><label>この場所をつついた時の台詞</label><textarea id="hz_${z.id}" rows="3">${esc(z.lines.join("\n"))}</textarea><label>つつきすぎセリフを言うまでの回数</label><div class="range-line"><span>回数</span><input type="number" min="1" max="99" value="${n}" oninput="setSpamCount('${z.id}',Number(this.value));this.nextElementSibling.value=Math.max(1,Math.min(99,Number(this.value)||1))"><output>${n}</output></div><label>つつきすぎセリフ（1行1個）</label><textarea id="hs_${z.id}" rows="3">${esc((z.spamLines||[]).join("\n"))}</textarea></div>`}
 function refreshHitPreview(){const old=$("hitPreview");if(!old)return;const wrap=old.closest(".preview-card");if(wrap){const temp=document.createElement("div");temp.innerHTML=hitPreviewHtml();wrap.replaceWith(temp.firstElementChild)}}
 function refreshImagePreview(){const el=$("imagePreview");if(!el)return;const c=activeChar(),img=imageCache.chars[c.id];el.innerHTML=img?`<img src="${img}" style="transform:${avatarTransform(c.image)}">`:`<div class="empty-preview">まだ画像がありません<br>下の「立ち絵画像」から選択してね</div>`}
-function addHitbox(){const label=$("newZoneLabel")?.value.trim()||"新しい場所";const id="zone_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);const c=activeChar();const z={id,label,x:35,y:35,w:30,h:20,lines:["ここをつついたの？","……ふふ。"]};c.zones.push(z);saveSilent();renderEditors();toast(label+"の当たり判定を追加したよ")}
+function addHitbox(){const label=$("newZoneLabel")?.value.trim()||"新しい場所";const id="zone_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);const c=activeChar();const z={id,label,x:35,y:35,w:30,h:20,lines:["ここをつついたの？","……ふふ。"],spamCount:5,spamLines:["……そこ、つつきすぎじゃない？"]};c.zones.push(z);saveSilent();renderEditors();toast(label+"の当たり判定を追加したよ")}
 function removeHitbox(id){const c=activeChar();if(c.zones.length<=1)return toast("当たり判定は1つ以上残してね");const z=c.zones.find(x=>x.id===id);if(!z)return;if(!confirm(`「${z.label}」の当たり判定を削除する？`))return;c.zones=c.zones.filter(x=>x.id!==id);saveSilent();renderEditors();toast("当たり判定を削除したよ")}
 function renameHitbox(id,label){const z=activeChar().zones.find(x=>x.id===id);if(!z)return;z.label=label.trim()||"名前なし";saveSilent();const box=document.querySelector(`[data-preview-zone="${id}"]`);if(box){const b=box.querySelector("b");if(b)b.textContent=z.label}}
 function setZone(id,key,value){const z=activeChar().zones.find(x=>x.id===id);if(!z)return;z[key]=value;saveSilent();const el=$("hitPreview");if(el){const box=el.querySelector(`[data-preview-zone="${id}"]`);if(box){box.style.left=z.x+"%";box.style.top=z.y+"%";box.style.width=z.w+"%";box.style.height=z.h+"%"}}}
+async function removeCharacterBackground(){
+ const c=activeChar(),src=imageCache.chars[c.id];
+ if(!src)return toast("先に立ち絵画像を選んでね");
+ if(!confirm("立ち絵の端からつながっている背景を透明にするよ。よければ続けてね。"))return;
+ const tolerance=Math.max(15,Math.min(70,Number($("bgRemoveTol")?.value)||36));
+ try{
+  const im=await new Promise((resolve,reject)=>{const x=new Image();x.onload=()=>resolve(x);x.onerror=()=>reject(new Error("image load failed"));x.src=src});
+  const maxSide=1600,ratio=Math.min(1,maxSide/Math.max(im.naturalWidth,im.naturalHeight));
+  const w=Math.max(1,Math.round(im.naturalWidth*ratio)),h=Math.max(1,Math.round(im.naturalHeight*ratio));
+  const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(im,0,0,w,h);
+  const img=ctx.getImageData(0,0,w,h),d=img.data,seen=new Uint8Array(w*h),q=new Int32Array(w*h),tol=tolerance,tol2=tol*tol;
+  let head=0,tail=0;
+  const push=(x,y)=>{const i=y*w+x;if(!seen[i]){seen[i]=1;q[tail++]=i}};
+  for(let x=0;x<w;x++){push(x,0);if(h>1)push(x,h-1)}
+  for(let y=1;y<h-1;y++){push(0,y);if(w>1)push(w-1,y)}
+  const neighbors=[[-1,0],[1,0],[0,-1],[0,1]];
+  while(head<tail){
+   const idx=q[head++],x=idx%w,y=(idx/w)|0,pi=idx*4;
+   if(d[pi+3]===0)continue;
+   const r=d[pi],g=d[pi+1],b=d[pi+2];
+   d[pi+3]=0;
+   for(const [dx,dy] of neighbors){
+    const nx=x+dx,ny=y+dy;if(nx<0||nx>=w||ny<0||ny>=h)continue;const ni=ny*w+nx,npi=ni*4;
+    if(seen[ni]||d[npi+3]===0)continue;
+    const dr=d[npi]-r,dg=d[npi+1]-g,db=d[npi+2]-b;
+    if(dr*dr+dg*dg+db*db<=tol2)push(nx,ny);
+   }
+  }
+  const out=canvas.toDataURL("image/png");
+  const saved=await putImage("char:"+c.id,out);
+  imageCache.chars[c.id]=out;setAvatar();refreshImagePreview();refreshHitPreview();
+  toast(saved?"背景を透過して保存したよ":"背景を透過したよ（表示のみ）");
+ }catch(e){console.error("background removal failed",e);toast("背景の透過に失敗したよ。もう一度試してみて")}
+}
+
 function setImageSetting(key,value){const c=activeChar();c.image=c.image||{scale:1,x:0,y:0};c.image[key]=value;saveSilent();setAvatar();refreshImagePreview();const p=$("hitPreview");if(p){const img=p.querySelector("img");if(img)img.style.transform=avatarTransform(c.image)}}
-function saveChar(){const c=activeChar();c.name=$("en").value.trim()||"名前なし";c.love=Math.max(0,Math.min(100,Number($("el").value)||0));for(const z of c.zones)z.lines=$("l_"+z.id).value.split("\n").map(s=>s.trim()).filter(Boolean);save();toast("キャラクター設定を保存したよ")}
-function saveHitboxes(){const c=activeChar();for(const z of c.zones)z.lines=$("hz_"+z.id).value.split("\n").map(s=>s.trim()).filter(Boolean);save();toast("当たり判定を保存したよ")}
+function saveChar(){const c=activeChar();c.name=$("en").value.trim()||"名前なし";c.love=Math.max(0,Math.min(100,Number($("el").value)||0));for(const z of c.zones){z.lines=$("l_"+z.id).value.split("\n").map(s=>s.trim()).filter(Boolean);normalizeZones(c)}save();toast("キャラクター設定を保存したよ")}
+function setSpamCount(id,value){const z=activeChar().zones.find(x=>x.id===id);if(!z)return;z.spamCount=Math.max(1,Math.min(99,Number(value)||1));saveSilent()}
+function saveHitboxes(){const c=activeChar();for(const z of c.zones){z.lines=$("hz_"+z.id).value.split("\n").map(s=>s.trim()).filter(Boolean);z.spamLines=$("hs_"+z.id).value.split("\n").map(s=>s.trim()).filter(Boolean);z.spamCount=Math.max(1,Math.min(99,Number(z.spamCount)||1))}save();toast("当たり判定を保存したよ")}
 function addCharacter(){const c=makeCharacter("新しいキャラクター");data.characters.push(c);data.activeCharacterId=c.id;saveSilent();render();tab("ce");toast("キャラクターを追加したよ")}
 async function removeCharacter(){if(data.characters.length<=1)return toast("最後の1人は削除できないよ");const c=activeChar();if(!confirm(`「${c.name}」を削除する？`))return;await deleteImage("char:"+c.id);data.characters=data.characters.filter(x=>x.id!==c.id);data.activeCharacterId=data.characters[0].id;delete imageCache.chars[c.id];save();toast("キャラクターを削除したよ")}
 function saveGifts(){for(const g of data.gifts){g.owned=Number($("o_"+g.id).value);g.normal=$("n_"+g.id).value;g.love=$("l_"+g.id).value;g.great=$("g_"+g.id).value;g.fav=Number($("f_"+g.id).value)}save();toast("贈り物設定を保存したよ")}
