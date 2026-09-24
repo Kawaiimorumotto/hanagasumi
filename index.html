@@ -118,13 +118,13 @@ function go(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remo
 function toast(t){$("toast").textContent=t;$("toast").style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").style.display="none",1500)}
 function rand(a){return a&&a.length?a[Math.floor(Math.random()*a.length)]:"……"}
 
-const IMAGE_DB="musubidokoro-images-v4";
+const IMAGE_DB="musubidokoro-images-v5";
 let imageCache={chars:{},gifts:{},outfits:{}};
 const imageObjectUrls=[];
 function openImageDB(){return new Promise((resolve,reject)=>{try{const r=indexedDB.open(IMAGE_DB,1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains("images"))db.createObjectStore("images")};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
 function makeImageUrl(v){if(!v)return "";if(typeof v==="string")return v;if(v instanceof Blob){const u=URL.createObjectURL(v);imageObjectUrls.push(u);return u}return ""}
 async function putImage(key,value){
- // v8: IndexedDBにはBlobをそのまま保存。画像をdata URLやcanvasへ変換せず、iPhoneで選んだ元ファイルを保持する。
+ // 画像はdata URL文字列としてIndexedDBに保存。File/Blobの構造化保存には依存しない。
  try{const db=await openImageDB();await new Promise((resolve,reject)=>{const tx=db.transaction("images","readwrite");tx.objectStore("images").put(value,key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();return true}catch(e){console.warn("IndexedDB save failed",e);return false}
 }
 async function getImage(key){
@@ -142,12 +142,34 @@ function avatarTransform(p){return `translate(calc(-50% + ${Number(p?.x)||0}%),c
 function setAvatar(){const c=activeChar(),box=$("char");box.innerHTML="";if(!c)return;const img=imageCache.chars[c.id];if(img){const im=document.createElement("img");im.className="avatar";im.src=img;im.style.transform=avatarTransform(c.image);box.appendChild(im)}
  for(const z of c.zones){const b=document.createElement("button");b.className="zone";b.dataset.zone=z.id;b.setAttribute("aria-label",z.label);b.title=z.label;b.style.left=z.x+"%";b.style.top=z.y+"%";b.style.width=z.w+"%";b.style.height=z.h+"%";b.onclick=()=>tapZone(z.id);box.appendChild(b)} }
 function tapZone(id){const c=activeChar(),z=c?.zones.find(x=>x.id===id);$("line").textContent=rand(z?.lines||["……"]);$("char").classList.add("blink");setTimeout(()=>$("char").classList.remove("blink"),170)}
-async function fileToImage(input,key,cacheType){const f=input.files?.[0];if(!f)return;try{const blob=await readImageBlob(f);const url=makeImageUrl(blob);if(!url)throw new Error("画像URLを作れませんでした");if(!imageCache[cacheType])imageCache[cacheType]={};imageCache[cacheType][key.split(":")[1]]=url;const saved=await putImage(key,blob);if(!saved)console.warn("画像は表示できるけどIndexedDBへの保存に失敗しました",key);toast("画像を読み込んだよ");render()}catch(e){console.error("image load failed",e,f?.name,f?.type,e?.message,e);toast("画像を読み込めなかったよ。もう一度選んでみて")}}
-function readImageBlob(file,max=1400){
- // iPhoneでは画像をcanvas/WebPへ変換せず、選んだ元ファイルをそのまま保存する。
- // これならPNG/JPEG/HEICなどで「読み込みに失敗」する経路を避けられる。
- return Promise.resolve(file);
+function readFileAsDataURL(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=()=>reject(r.error||new Error("FileReader failed"));r.readAsDataURL(file)})}
+async function fileToImage(input,key,cacheType){
+ const f=input.files?.[0];
+ if(!f)return;
+ try{
+   // 画像をcanvasにもBlobにも変換しない。FileReaderで「選んだファイル→data URL」を直接作る。
+   // iPhone SafariでのBlob/IndexedDB/URL.createObjectURLの相性問題を避ける。
+   const url=await readFileAsDataURL(f);
+   if(!url)throw new Error("data URLを作れませんでした");
+   // Safariが実際に画像として描画できるか、その場で確認する。
+   await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve();im.onerror=()=>reject(new Error("画像を表示できませんでした"));im.src=url});
+   const id=key.split(":")[1];
+   if(!imageCache[cacheType])imageCache[cacheType]={};
+   imageCache[cacheType][id]=url;
+   // IndexedDBには文字列として保存するので、File/Blobの構造化保存に依存しない。
+   const saved=await putImage(key,url);
+   if(!saved)console.warn("画像は表示できるけどIndexedDBへの保存に失敗しました",key);
+   // エディタ全体をrenderし直さず、現在のプレビューだけを更新する。
+   setAvatar();
+   refreshImagePreview();
+   refreshHitPreview();
+   toast(saved?"画像を読み込んだよ":"画像を表示したよ（保存はできなかったけど表示はできています）");
+ }catch(e){
+   console.error("image load failed",e,f?.name,f?.type,e?.message,e);
+   toast("この画像はSafariで表示できなかったよ。別のPNG/JPEGでも試してみて");
+ }
 }
+
 function renderSwitcher(){const sel=$("charSwitcher");sel.innerHTML=data.characters.map(c=>`<option value="${esc(c.id)}">${esc(c.name||"名前なし")}</option>`).join("");sel.value=data.activeCharacterId;sel.onchange=()=>switchCharacter(sel.value)}
 function switchCharacter(id){if(!data.characters.some(c=>c.id===id))return;data.activeCharacterId=id;saveSilent();render();const c=activeChar();$("line").textContent=rand(c.zones.find(z=>z.id==="head")?.lines||["……"]);toast(c.name+"に切り替えたよ")}
 function render(){const c=activeChar();if(!c)return;$("name").textContent=c.name||"名前なし";setAvatar();$("meter").style.width=Math.min(100,c.love||0)+"%";$("love").textContent=`親密度 ${c.love||0} / 100`;$("gems").textContent=gems;$("count").textContent=data.gifts.reduce((s,g)=>s+g.owned,0);$("gachaName").textContent=data.gacha.name;renderSwitcher();renderGifts();renderOutfits();renderEditors();tab(currentTab)}
