@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#8f3438">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="花霞">
+<meta name="apple-mobile-web-app-title" content="むすびどころ">
 <link rel="manifest" href="manifest.webmanifest">
-<title>花霞</title>
+<title>むすびどころ</title>
 <style>
 :root{--red:#8f3438;--deep:#43282a;--gold:#b48a43;--paper:#f8f0de;--cream:#fffaf0;--line:#c8ab79;--muted:#77695e}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:#201a18;color:#332927;font-family:"Hiragino Mincho ProN","Yu Mincho",serif}button,input,textarea,select{font:inherit}button{border:0}
@@ -19,7 +19,7 @@ header{height:54px;display:flex;align-items:center;justify-content:space-between
 .home:before{content:"";position:absolute;inset:0;opacity:.25;background:linear-gradient(90deg,transparent 49%,#9d3d3d 50%,transparent 51%),linear-gradient(0deg,transparent 49%,#b48a43 50%,transparent 51%);background-size:42px 42px}
 .hero{height:calc(100dvh - 136px);min-height:520px;position:relative;display:flex;justify-content:center;align-items:center}
 .char{width:min(64vw,280px);height:min(74vh,480px);overflow:hidden;min-height:370px;border-radius:46% 46% 12% 12%;background:linear-gradient(#e7c6ae 0 21%,#493034 21% 38%,#f2dfbe 38% 68%,#7e303d 68%);box-shadow:0 18px 45px #4a332533;position:relative;transition:.15s;user-select:none}
-.char.blink{filter:brightness(1.05)}.char img.avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1;pointer-events:none}.char .zone{z-index:3}
+.char.blink{filter:brightness(1.05)}.char img.avatar{position:absolute;left:50%;top:50%;width:100%;height:100%;object-fit:contain;z-index:1;pointer-events:none;transform:translate(-50%,-50%) scale(1);transform-origin:center center}.zone.edit-zone{border:1px dashed #8f3438;background:#8f34381c;z-index:4}.zone.edit-zone b{font-size:10px;background:#8f3438;color:#fff;padding:2px 5px;border-radius:5px;position:absolute;left:3px;top:3px}.hit-preview{position:relative;width:220px;height:330px;margin:10px auto;border-radius:46% 46% 12% 12%;background:linear-gradient(#e7c6ae 0 21%,#493034 21% 38%,#f2dfbe 38% 68%,#7e303d 68%);overflow:hidden;box-shadow:0 8px 22px #4a332522}.hit-preview img{position:absolute;left:50%;top:50%;width:100%;height:100%;object-fit:contain;transform:translate(-50%,-50%);pointer-events:none}.zone-row{border:1px solid #ddceb2;border-radius:9px;padding:9px;margin:8px 0;background:#fffaf0}.range-line{display:grid;grid-template-columns:42px 1fr 54px;gap:6px;align-items:center;font-size:11px;margin:5px 0}.range-line input[type=range]{padding:0;border:0}.range-line output{text-align:right}.char-switch{max-width:135px;background:#fffdf8;border:1px solid var(--line);border-radius:7px;padding:5px;font-size:11px}.editor-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.char .zone{z-index:3}
 .char:before{content:"";position:absolute;width:43%;height:28%;top:16%;left:28%;border:5px solid #432c30;border-radius:50%;background:#f3cdb4}
 .char:after{content:"";position:absolute;width:13%;height:8%;top:27%;left:37%;border-radius:50%;background:#432c30;box-shadow:110% 0 #432c30}
 .zone{position:absolute;z-index:3;border:1px dashed transparent;border-radius:30px;background:transparent}
@@ -37,30 +37,27 @@ label{display:block;font-size:12px;margin:9px 0 5px}input,textarea,select{width:
 </head>
 <body>
 <div id="app">
-<header><div class="logo">花霞</div><div class="wallet">花玉 <b id="gems">1200</b>　贈り物 <b id="count">0</b></div></header>
+<header><div class="logo">むすびどころ</div><select id="charSwitcher" class="char-switch" aria-label="キャラクター切替"></select><div class="wallet">花玉 <b id="gems">1200</b>　贈り物 <b id="count">0</b></div></header>
 
 <section id="home" class="screen active home">
  <div class="hero">
-  <div id="char" class="char">
-   <button class="zone head" data-zone="head" aria-label="頭"></button><button class="zone face" data-zone="face" aria-label="顔"></button><button class="zone hand" data-zone="hand" aria-label="手"></button><button class="zone body" data-zone="body" aria-label="身体"></button>
-  </div>
-  <div class="dialogue"><div class="name" id="name">綾乃</div><div class="line" id="line">……また来たんだね。</div><div class="meter"><i id="meter"></i></div><div class="love" id="love">親密度 12 / 100</div></div>
+  <div id="char" class="char"></div>
+  <div class="dialogue"><div class="name" id="name">新しいキャラクター</div><div class="line" id="line">……。</div><div class="meter"><i id="meter"></i></div><div class="love" id="love">親密度 0 / 100</div></div>
  </div>
 </section>
 
 <section id="gift" class="screen"><div class="panel"><h2>贈り物</h2><div class="card hint">アイテムをタップするとキャラクターに贈れます。反応と親密度は編集画面から変更できます。</div><div id="giftGrid" class="grid"></div></div></section>
 <section id="gacha" class="screen"><div class="panel"><h2>召喚</h2><div class="gacha-banner"><div>期間限定</div><h3 id="gachaName">夏祭り・百花繚乱</h3><div>SSR 5%　SR 20%　R 75%</div></div><div class="row"><button class="btn" onclick="pull(1)">1回　100花玉</button><button class="btn" onclick="pull(10)">10回　900花玉</button></div><div id="result" class="card result" style="margin-top:12px">召喚結果がここに表示されます。</div></div></section>
 <section id="dress" class="screen"><div class="panel"><h2>着せ替え</h2><div class="card"><div class="char-preview"><div class="char smallchar"></div></div><div id="outfitNow">通常衣装</div></div><div id="outfitGrid" class="grid"></div></div></section>
-<section id="edit" class="screen"><div class="panel"><h2>制作・設定</h2><div class="card"><div class="tabs"><button class="btn alt" onclick="tab('ce')">キャラ</button><button class="btn alt" onclick="tab('ge')">贈り物</button><button class="btn alt" onclick="tab('oe')">衣装</button><button class="btn alt" onclick="tab('qa')">ガチャ</button><button class="btn alt" onclick="tab('io')">保存</button></div><div id="ce" class="editor"></div><div id="ge" class="editor" style="display:none"></div><div id="oe" class="editor" style="display:none"></div><div id="qa" class="editor" style="display:none"></div><div id="io" class="editor" style="display:none"></div></div></div></section>
+<section id="edit" class="screen"><div class="panel"><h2>制作・設定</h2><div class="card"><div class="tabs"><button class="btn alt" onclick="tab('ce')">キャラクター</button><button class="btn alt" onclick="tab('hit')">当たり判定</button><button class="btn alt" onclick="tab('ge')">贈り物</button><button class="btn alt" onclick="tab('oe')">衣装</button><button class="btn alt" onclick="tab('qa')">ガチャ</button><button class="btn alt" onclick="tab('io')">保存</button></div><div id="ce" class="editor"></div><div id="hit" class="editor" style="display:none"></div><div id="ge" class="editor" style="display:none"></div><div id="oe" class="editor" style="display:none"></div><div id="qa" class="editor" style="display:none"></div><div id="io" class="editor" style="display:none"></div></div></div></section>
 
 <nav class="nav"><button onclick="go('home')"><b>花</b>ホーム</button><button onclick="go('gift')"><b>贈</b>贈り物</button><button onclick="go('gacha')"><b>召</b>ガチャ</button><button onclick="go('dress')"><b>衣</b>着せ替え</button><button onclick="go('edit')"><b>筆</b>編集</button></nav>
 </div>
 <div id="modal" class="modal"><div class="modalbox"><div id="modalBody"></div><button class="btn alt" onclick="closeModal()" style="margin-top:10px">閉じる</button></div></div>
 <div id="toast" class="toast"></div>
 
-<script>
-const seed={
-character:{name:"綾乃",love:12,lines:{head:["髪、触るの好きなの？","……くすぐったいよ。","また頭を撫でてる。"],face:["そんなに顔を見る？","……近いよ。","楽しそうだね。"],hand:["手、繋ぎたいの？","……しょうがないな。","どうしたの？"],body:["そこはつつくところじゃないよ。","ふふ、元気だね。","今日はご機嫌だね。"]}},
+<script>const seed={
+characters:[],activeCharacterId:null,
 gifts:[
 {id:"onigiri",name:"おにぎり",icon:"🍙",rarity:"R",fav:8,normal:"お、これ好きなんだよね。",love:"具は何かな？",great:"君が握ってくれたの？",owned:3},
 {id:"apple",name:"りんご飴",icon:"🍎",rarity:"SR",fav:12,normal:"お祭りのやつだね。",love:"……これ、好き。",great:"これを選んでくれたの？",owned:2},
@@ -69,82 +66,100 @@ gifts:[
 {id:"ramune",name:"ラムネ",icon:"🫧",rarity:"SR",fav:10,normal:"懐かしいな。",love:"祭りって感じがする。",great:"……一緒に飲む？",owned:0},
 {id:"firework",name:"花火",icon:"🎆",rarity:"SSR",fav:20,normal:"きれいだね。",love:"夜空に咲く花みたい。",great:"……君と見たかった。",owned:0}],
 outfits:[{id:"default",name:"通常衣装",rarity:"N",owned:true},{id:"summer",name:"夏祭りの浴衣",rarity:"SR",owned:false},{id:"formal",name:"月夜の晴れ着",rarity:"SSR",owned:false}],
-gacha:{name:"夏祭り・百花繚乱"},images:{character:"",gifts:{},outfits:{}}};
-let data=JSON.parse(localStorage.getItem("hanagasumi-v2")||"null")||seed;
-let gems=Number(localStorage.getItem("hanagasumi-gems")||1200);
-const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function save(){localStorage.setItem("hanagasumi-v2",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems);render()}
-function go(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));$(id).classList.add("active")}
-function toast(t){$("toast").textContent=t;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",1500)}
-function rand(a){return a[Math.floor(Math.random()*a.length)]}
+gacha:{name:"夏祭り・百花繚乱"},images:{gifts:{},outfits:{}}};
 
-function readImage(file,max=1200){
- return new Promise((resolve,reject)=>{
-  const r=new FileReader();
-  r.onload=()=>{const img=new Image();img.onload=()=>{
-    const scale=Math.min(1,max/Math.max(img.width,img.height));
-    const c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
-    c.getContext("2d").drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL("image/webp",.82));
-  };img.onerror=reject;img.src=r.result};r.onerror=reject;r.readAsDataURL(file);
- })
+const zoneDefaults=[
+{id:"head",label:"頭",x:10,y:6,w:80,h:26,lines:["髪、触るの好きなの？","……くすぐったいよ。","また頭を撫でてる。"]},
+{id:"face",label:"顔",x:25,y:18,w:50,h:20,lines:["そんなに顔を見る？","……近いよ。","楽しそうだね。"]},
+{id:"hand",label:"手",x:5,y:42,w:35,h:28,lines:["手、繋ぎたいの？","……しょうがないな。","どうしたの？"]},
+{id:"body",label:"身体",x:27,y:40,w:55,h:40,lines:["そこはつつくところじゃないよ。","ふふ、元気だね。","今日はご機嫌だね。"]}
+];
+function makeCharacter(name="新しいキャラクター"){
+ const id="char_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
+ return {id,name,love:0,image:{scale:1,x:0,y:0},zones:JSON.parse(JSON.stringify(zoneDefaults))};
 }
-// 画像はlocalStorageではなくIndexedDBに保存。iPhoneの写真でも容量超過しにくくする。
+function migrate(){
+ const fresh=JSON.parse(JSON.stringify(seed));
+ let current=JSON.parse(localStorage.getItem("musubidokoro-v5")||"null");
+ if(current&&Array.isArray(current.characters))return current;
+ const old=JSON.parse(localStorage.getItem("hanagasumi-v2")||"null");
+ if(old){
+   fresh.gifts=old.gifts||fresh.gifts; fresh.outfits=old.outfits||fresh.outfits; fresh.gacha=old.gacha||fresh.gacha;
+   fresh.images.gifts=old.images?.gifts||{}; fresh.images.outfits=old.images?.outfits||{};
+ }
+ const c=makeCharacter(); fresh.characters=[c]; fresh.activeCharacterId=c.id;
+ localStorage.setItem("musubidokoro-v5",JSON.stringify(fresh));
+ return fresh;
+}
+let data=migrate();
+let gems=Number(localStorage.getItem("hanagasumi-gems")||1200);
+let currentTab="ce";
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function activeChar(){return data.characters.find(c=>c.id===data.activeCharacterId)||data.characters[0]}
+function save(){localStorage.setItem("musubidokoro-v5",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems);render()}
+function saveSilent(){localStorage.setItem("musubidokoro-v5",JSON.stringify(data));localStorage.setItem("hanagasumi-gems",gems)}
+function go(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));$(id).classList.add("active")}
+function toast(t){$("toast").textContent=t;$("toast").style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").style.display="none",1500)}
+function rand(a){return a&&a.length?a[Math.floor(Math.random()*a.length)]:"……"}
+
 const IMAGE_DB="musubidokoro-images";
-let imageCache={character:"",gifts:{},outfits:{}};
+let imageCache={chars:{},gifts:{},outfits:{}};
 function openImageDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(IMAGE_DB,1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains("images"))db.createObjectStore("images")};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
 async function putImage(key,value){const db=await openImageDB();return new Promise((resolve,reject)=>{const tx=db.transaction("images","readwrite");tx.objectStore("images").put(value,key);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}})}
 async function getImage(key){const db=await openImageDB();return new Promise((resolve,reject)=>{const tx=db.transaction("images","readonly");const r=tx.objectStore("images").get(key);r.onsuccess=()=>{db.close();resolve(r.result||"")};r.onerror=()=>{db.close();reject(r.error)}})}
-async function loadImages(){try{imageCache.character=await getImage("character");for(const g of data.gifts)imageCache.gifts[g.id]=await getImage("gift:"+g.id);for(const o of data.outfits)imageCache.outfits[o.id]=await getImage("outfit:"+o.id)}catch(e){console.warn("image load failed",e)}}
-function setAvatar(){const box=$("char");let old=box.querySelector("img.avatar");if(old)old.remove();if(imageCache.character){let im=document.createElement("img");im.className="avatar";im.src=imageCache.character;box.prepend(im)}}
-function fileToImage(input,callback){const f=input.files?.[0];if(!f)return;readImage(f).then(async x=>{await callback(x);save();toast("画像を保存したよ")}).catch(e=>{console.error(e);toast("画像を読み込めなかったよ")})}
-function render(){if(!data.images)data.images={character:"",gifts:{},outfits:{}};if(!data.images.gifts)data.images.gifts={};if(!data.images.outfits)data.images.outfits={};$("name").textContent=data.character.name;setAvatar();$("meter").style.width=Math.min(100,data.character.love)+"%";$("love").textContent=`親密度 ${data.character.love} / 100`;$("gems").textContent=gems;$("count").textContent=data.gifts.reduce((s,g)=>s+g.owned,0);$("gachaName").textContent=data.gacha.name;renderGifts();renderOutfits();renderEditors()}
-document.querySelectorAll(".zone").forEach(z=>z.onclick=()=>{$("line").textContent=rand(data.character.lines[z.dataset.zone]||["……"]);$("char").classList.add("blink");setTimeout(()=>$("char").classList.remove("blink"),170)});
+async function deleteImage(key){try{const db=await openImageDB();await new Promise((resolve,reject)=>{const tx=db.transaction("images","readwrite");tx.objectStore("images").delete(key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}catch(e){}}
+async function loadImages(){try{
+ for(const c of data.characters)imageCache.chars[c.id]=await getImage("char:"+c.id);
+ for(const g of data.gifts)imageCache.gifts[g.id]=await getImage("gift:"+g.id);
+ for(const o of data.outfits)imageCache.outfits[o.id]=await getImage("outfit:"+o.id);
+ }catch(e){console.warn("image load failed",e)} }
+function setAvatar(){const c=activeChar(),box=$("char");box.innerHTML="";if(!c)return;const img=imageCache.chars[c.id];if(img){const im=document.createElement("img");im.className="avatar";const p=c.image||{scale:1,x:0,y:0};im.src=img;im.style.transform=`translate(calc(-50% + ${Number(p.x)||0}%),calc(-50% + ${Number(p.y)||0}%)) scale(${Number(p.scale)||1})`;box.appendChild(im)}
+ for(const z of c.zones){const b=document.createElement("button");b.className="zone";b.dataset.zone=z.id;b.setAttribute("aria-label",z.label);b.title=z.label;b.style.left=z.x+"%";b.style.top=z.y+"%";b.style.width=z.w+"%";b.style.height=z.h+"%";b.onclick=()=>tapZone(z.id);box.appendChild(b)} }
+function tapZone(id){const c=activeChar(),z=c?.zones.find(x=>x.id===id);$("line").textContent=rand(z?.lines||["……"]);$("char").classList.add("blink");setTimeout(()=>$("char").classList.remove("blink"),170)}
+function fileToImage(input,callback){const f=input.files?.[0];if(!f)return;readImage(f).then(async x=>{await callback(x);toast("画像を保存したよ");render()}).catch(e=>{console.error(e);toast("画像を読み込めなかったよ")})}
+function readImage(file,max=1200){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext("2d").drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL("image/webp",.82))};img.onerror=reject;img.src=r.result};r.onerror=reject;r.readAsDataURL(file)})}
+function renderSwitcher(){const sel=$("charSwitcher");sel.innerHTML=data.characters.map(c=>`<option value="${esc(c.id)}">${esc(c.name||"名前なし")}</option>`).join("");sel.value=data.activeCharacterId;sel.onchange=()=>switchCharacter(sel.value)}
+function switchCharacter(id){if(!data.characters.some(c=>c.id===id))return;data.activeCharacterId=id;saveSilent();render();const c=activeChar();$("line").textContent=rand(c.zones.find(z=>z.id==="head")?.lines||["……"]);toast(c.name+"に切り替えたよ")}
+function render(){const c=activeChar();if(!c)return;$("name").textContent=c.name||"名前なし";setAvatar();$("meter").style.width=Math.min(100,c.love||0)+"%";$("love").textContent=`親密度 ${c.love||0} / 100`;$("gems").textContent=gems;$("count").textContent=data.gifts.reduce((s,g)=>s+g.owned,0);$("gachaName").textContent=data.gacha.name;renderSwitcher();renderGifts();renderOutfits();renderEditors();tab(currentTab)}
 function renderGifts(){$("giftGrid").innerHTML=data.gifts.map(g=>`<button class="item" onclick="give('${g.id}')"><div class="icon">${imageCache.gifts?.[g.id]?`<img src="${imageCache.gifts[g.id]}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">`:g.icon}</div><div class="row"><b>${esc(g.name)}</b><span class="tag">${g.rarity}</span></div><div class="small">所持 ${g.owned}　親密度 +${g.fav}</div></button>`).join("")}
-function give(id){let g=data.gifts.find(x=>x.id===id);if(!g.owned)return toast("そのアイテムは持っていないよ");g.owned--;data.character.love=Math.min(100,data.character.love+g.fav);$("line").textContent=data.character.love>=70?g.great:data.character.love>=30?g.love:g.normal;save();go("home");toast(g.name+"を贈った！")}
+function give(id){let g=data.gifts.find(x=>x.id===id);const c=activeChar();if(!g.owned)return toast("そのアイテムは持っていないよ");g.owned--;c.love=Math.min(100,c.love+g.fav);$("line").textContent=c.love>=70?g.great:c.love>=30?g.love:g.normal;save();go("home");toast(g.name+"を贈った！")}
 function renderOutfits(){$("outfitGrid").innerHTML=data.outfits.map(o=>`<button class="item" onclick="equip('${o.id}')"><div class="icon">${imageCache.outfits?.[o.id]?`<img src="${imageCache.outfits[o.id]}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">`:(o.id==="summer"?"👘":o.id==="formal"?"🌙":"🌸")}</div><div class="row"><b>${esc(o.name)}</b><span class="tag">${o.rarity}</span></div><div class="small">${o.owned?"所持済み":"未所持"}</div></button>`).join("")}
 function equip(id){let o=data.outfits.find(x=>x.id===id);if(!o.owned)return toast("まだ持っていない衣装だよ");$("outfitNow").textContent=o.name;toast(o.name+"に着替えた！")}
 function pull(n){let cost=n===10?900:100;if(gems<cost)return toast("花玉が足りないよ");gems-=cost;let a=[];for(let i=0;i<n;i++){let r=Math.random(),rar=r<.05?"SSR":r<.25?"SR":"R",pool=data.gifts.filter(g=>g.rarity===rar);let g=rand(pool.length?pool:data.gifts);g.owned++;a.push(g.name)}$("result").innerHTML="<b>召喚結果</b><br>"+a.join("、");save();toast("召喚完了！")}
-function tab(id){document.querySelectorAll(".editor").forEach(x=>x.style.display="none");$(id).style.display="block"}
+function tab(id){currentTab=id;document.querySelectorAll(".editor").forEach(x=>x.style.display="none");if($(id))$(id).style.display="block"}
 function renderEditors(){
-$("ce").innerHTML=`<h3>キャラクター</h3><label>名前</label><input id="en" value="${esc(data.character.name)}"><label>親密度</label><input id="el" type="number" min="0" max="100" value="${data.character.love}">${Object.entries(data.character.lines).map(([k,v])=>`<label>${k}の台詞（1行1個）</label><textarea id="l_${k}" rows="4">${esc(v.join("\\n"))}</textarea>`).join("")}<label>立ち絵画像</label><input id="charImg" type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.character=x;await putImage('character',x);render()})"><p class="hint">iPhoneの写真・ファイルから選択できます。画像はこのブラウザのゲームデータ内に保存します。</p><button class="btn" onclick="saveChar()">保存</button>`;
-$("ge").innerHTML=`<h3>贈り物</h3>${data.gifts.map(g=>`<div class="card"><b>${g.icon} ${esc(g.name)}</b><label>所持数</label><input id="o_${g.id}" type="number" min="0" value="${g.owned}"><label>通常反応</label><input id="n_${g.id}" value="${esc(g.normal)}"><label>好き</label><input id="l_${g.id}" value="${esc(g.love)}"><label>大好物</label><input id="g_${g.id}" value="${esc(g.great)}"><label>親密度</label><input id="f_${g.id}" type="number" value="${g.fav}"><label>アイテム画像</label><input type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.gifts[g.id]=x;await putImage('gift:'+g.id,x);render()})"></div>`).join("")}<button class="btn" onclick="saveGifts()">保存</button>
-<hr class="sep"><h4>新しい贈り物を追加</h4>
-<label>名前</label><input id="newGiftName" placeholder="例：わたあめ">
-<label>絵文字（画像なし時の表示）</label><input id="newGiftIcon" value="🎁">
-<label>レアリティ</label><select id="newGiftRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select>
-<button class="btn alt" onclick="addGift()">贈り物を追加</button>`;
-$("oe").innerHTML=`<h3>衣装</h3>${data.outfits.map(o=>`<div class="card"><label>衣装名</label><input id="out_${o.id}" value="${esc(o.name)}"><div class="small">${o.rarity} / ${o.owned?"所持":"未所持"}</div><label>衣装画像</label><input type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.outfits[o.id]=x;await putImage('outfit:'+o.id,x);render()})"></div>`).join("")}<button class="btn" onclick="saveOutfits()">保存</button>
-<hr class="sep"><h4>新しい衣装を追加</h4>
-<label>衣装名</label><input id="newOutfitName" placeholder="例：藤の花の着物">
-<label>レアリティ</label><select id="newOutfitRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select>
-<button class="btn alt" onclick="addOutfit()">衣装を追加</button><p class="hint">衣装画像の端末内保存は次の画像管理アップデートで対応します。</p>`;
-$("qa").innerHTML=`<h3>ガチャ</h3><label>ガチャ名</label><input id="qname" value="${esc(data.gacha.name)}"><button class="btn" onclick="data.gacha.name=$('qname').value;save();toast('保存したよ')">保存</button>`;
-$("io").innerHTML=`<h3>データ</h3><p class="hint">台詞・親密度・贈り物・衣装・ガチャ設定をJSONとして保存／復元できます。</p><button class="btn" onclick="exportJSON()">JSON書き出し</button> <button class="btn alt" onclick="$('importFile').click()">JSON読み込み</button><input id="importFile" type="file" accept=".json,application/json" hidden onchange="importJSON(this)"><hr class="sep"><button class="btn" onclick="exportZip()">ゲームデータZIP</button><p class="hint">このHTML、PWA設定、現在のゲームデータをまとめたZIPを作ります。</p><hr class="sep"><button class="btn alt" onclick="installGuide()">iPhoneへの追加方法</button>`;
+ const c=activeChar();
+ $("ce").innerHTML=`<h3>キャラクター</h3><label>現在のキャラクター</label><select id="editCharSelect" onchange="switchCharacter(this.value)">${data.characters.map(x=>`<option value="${esc(x.id)}" ${x.id===c.id?"selected":""}>${esc(x.name||"名前なし")}</option>`).join("")}</select><div class="editor-actions"><button class="btn" onclick="addCharacter()">＋キャラクター追加</button>${data.characters.length>1?`<button class="btn alt" onclick="removeCharacter()">現在のキャラを削除</button>`:""}</div><hr class="sep"><label>名前</label><input id="en" value="${esc(c.name)}"><label>親密度</label><input id="el" type="number" min="0" max="100" value="${c.love}"><label>立ち絵画像</label><input id="charImg" type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.chars[c.id]=x;await putImage('char:'+c.id,x)})"><p class="hint">画像はキャラクターごとに、このブラウザ内だけに保存されます。</p><label>画像サイズ：<span id="scaleVal">${Math.round((c.image?.scale||1)*100)}%</span></label><input type="range" min="50" max="200" step="1" value="${Math.round((c.image?.scale||1)*100)}" oninput="setImageSetting('scale',Number(this.value)/100);$(\'scaleVal\').textContent=this.value+\'%\'"><label>画像の左右位置：<span id="xVal">${c.image?.x||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.x||0}" oninput="setImageSetting('x',Number(this.value));$(\'xVal\').textContent=this.value+\'%\'"><label>画像の上下位置：<span id="yVal">${c.image?.y||0}%</span></label><input type="range" min="-50" max="50" step="1" value="${c.image?.y||0}" oninput="setImageSetting('y',Number(this.value));$(\'yVal\').textContent=this.value+\'%\'"><p class="hint">画像の大きさ・位置を調整すると、その設定がキャラクターごとに保存されます。</p><hr class="sep">${c.zones.map(z=>`<label>${esc(z.label)}の台詞（1行1個）</label><textarea id="l_${z.id}" rows="4">${esc(z.lines.join("\n"))}</textarea>`).join("")}<button class="btn" onclick="saveChar()">キャラクター設定を保存</button>`;
+ $("hit").innerHTML=`<h3>つつく位置の設定</h3><p class="hint">赤い枠がタップ判定です。画像の上で重なっている場所を調整して、頭・顔・手・身体など好きな位置に配置できます。</p>${hitPreviewHtml()}${c.zones.map(z=>zoneControlHtml(z)).join("")}<button class="btn" onclick="saveHitboxes()">当たり判定と台詞を保存</button>`;
+ $("ge").innerHTML=`<h3>贈り物</h3>${data.gifts.map(g=>`<div class="card"><b>${g.icon} ${esc(g.name)}</b><label>所持数</label><input id="o_${g.id}" type="number" min="0" value="${g.owned}"><label>通常反応</label><input id="n_${g.id}" value="${esc(g.normal)}"><label>好き</label><input id="l_${g.id}" value="${esc(g.love)}"><label>大好物</label><input id="g_${g.id}" value="${esc(g.great)}"><label>親密度</label><input id="f_${g.id}" type="number" value="${g.fav}"><label>アイテム画像</label><input type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.gifts[g.id]=x;await putImage('gift:'+g.id,x)})"></div>`).join("")}<button class="btn" onclick="saveGifts()">保存</button><hr class="sep"><h4>新しい贈り物を追加</h4><label>名前</label><input id="newGiftName" placeholder="例：わたあめ"><label>絵文字（画像なし時の表示）</label><input id="newGiftIcon" value="🎁"><label>レアリティ</label><select id="newGiftRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select><button class="btn alt" onclick="addGift()">贈り物を追加</button>`;
+ $("oe").innerHTML=`<h3>衣装</h3>${data.outfits.map(o=>`<div class="card"><label>衣装名</label><input id="out_${o.id}" value="${esc(o.name)}"><div class="small">${o.rarity} / ${o.owned?"所持":"未所持"}</div><label>衣装画像</label><input type="file" accept="image/*" onchange="fileToImage(this,async x=>{imageCache.outfits[o.id]=x;await putImage('outfit:'+o.id,x)})"></div>`).join("")}<button class="btn" onclick="saveOutfits()">保存</button><hr class="sep"><h4>新しい衣装を追加</h4><label>衣装名</label><input id="newOutfitName" placeholder="例：藤の花の着物"><label>レアリティ</label><select id="newOutfitRarity"><option>N</option><option>R</option><option>SR</option><option>SSR</option></select><button class="btn alt" onclick="addOutfit()">衣装を追加</button>`;
+ $("qa").innerHTML=`<h3>ガチャ</h3><label>ガチャ名</label><input id="qname" value="${esc(data.gacha.name)}"><button class="btn" onclick="data.gacha.name=$(\'qname\').value;save();toast(\'保存したよ\')">保存</button>`;
+ $("io").innerHTML=`<h3>データ</h3><p class="hint">キャラクター・当たり判定・台詞・親密度・贈り物・衣装・ガチャ設定をJSONとして保存／復元できます。画像そのものはブラウザ内の画像DBに保存され、JSONには含まれません。</p><button class="btn" onclick="exportJSON()">JSON書き出し</button> <button class="btn alt" onclick="$(\'importFile\').click()">JSON読み込み</button><input id="importFile" type="file" accept=".json,application/json" hidden onchange="importJSON(this)"><hr class="sep"><button class="btn" onclick="exportZip()">ゲームデータZIP</button><p class="hint">このHTML、PWA設定、現在のゲームデータをまとめたZIPを作ります。</p><hr class="sep"><button class="btn alt" onclick="resetProject()">むすびどころのデータを初期化</button>`;
 }
-
-function addGift(){
- const name=$("newGiftName").value.trim(); if(!name)return toast("名前を入れてね");
- const id="gift_"+Date.now(); data.gifts.push({id,name,icon:$("newGiftIcon").value||"🎁",rarity:$("newGiftRarity").value,fav:5,normal:"ありがとう。",love:"これ、好きかも。",great:"大切にするね。",owned:0});
- data.images.gifts[id]=""; save(); toast(name+"を追加したよ");
-}
-function addOutfit(){
- const name=$("newOutfitName").value.trim(); if(!name)return toast("名前を入れてね");
- const id="outfit_"+Date.now(); data.outfits.push({id,name,rarity:$("newOutfitRarity").value,owned:false}); data.images.outfits[id]=""; save(); toast(name+"を追加したよ");
-}
-function saveChar(){data.character.name=$("en").value;data.character.love=Number($("el").value);for(const k of Object.keys(data.character.lines))data.character.lines[k]=$("l_"+k).value.split("\\n").map(s=>s.trim()).filter(Boolean);save();toast("キャラ設定を保存したよ")}
+function hitPreviewHtml(){const c=activeChar(),img=imageCache.chars[c.id],p=c.image||{scale:1,x:0,y:0};return `<div class="hit-preview" id="hitPreview">${img?`<img src="${img}" style="transform:translate(calc(-50% + ${p.x||0}%),calc(-50% + ${p.y||0}%)) scale(${p.scale||1})">`:""}${c.zones.map(z=>`<div class="zone edit-zone" style="left:${z.x}%;top:${z.y}%;width:${z.w}%;height:${z.h}%"><b>${esc(z.label)}</b></div>`).join("")}</div>`}
+function zoneControlHtml(z){return `<div class="zone-row"><b>${esc(z.label)}</b><div class="range-line"><span>左</span><input type="range" min="0" max="100" value="${z.x}" oninput="setZone('${z.id}','x',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.x}</output></div><div class="range-line"><span>上</span><input type="range" min="0" max="100" value="${z.y}" oninput="setZone('${z.id}','y',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.y}</output></div><div class="range-line"><span>幅</span><input type="range" min="5" max="100" value="${z.w}" oninput="setZone('${z.id}','w',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.w}</output></div><div class="range-line"><span>高さ</span><input type="range" min="5" max="100" value="${z.h}" oninput="setZone('${z.id}','h',Number(this.value));this.nextElementSibling.value=this.value"><output>${z.h}</output></div><label>この場所をつついた時の台詞</label><textarea id="hz_${z.id}" rows="3">${esc(z.lines.join("\n"))}</textarea></div>`}
+function refreshHitPreview(){const el=$("hitPreview");if(el)el.outerHTML=hitPreviewHtml()}
+function setZone(id,key,value){const z=activeChar().zones.find(x=>x.id===id);if(!z)return;z[key]=value;saveSilent();refreshHitPreview()}
+function setImageSetting(key,value){const c=activeChar();c.image=c.image||{scale:1,x:0,y:0};c.image[key]=value;saveSilent();setAvatar();const p=$("hitPreview");if(p){const img=p.querySelector("img");if(img)img.style.transform=`translate(calc(-50% + ${c.image.x||0}%),calc(-50% + ${c.image.y||0}%)) scale(${c.image.scale||1})`}}
+function saveChar(){const c=activeChar();c.name=$("en").value.trim()||"名前なし";c.love=Math.max(0,Math.min(100,Number($("el").value)||0));for(const z of c.zones)z.lines=$("l_"+z.id).value.split("\n").map(s=>s.trim()).filter(Boolean);save();toast("キャラクター設定を保存したよ")}
+function saveHitboxes(){const c=activeChar();for(const z of c.zones)z.lines=$("hz_"+z.id).value.split("\n").map(s=>s.trim()).filter(Boolean);save();toast("当たり判定を保存したよ")}
+function addCharacter(){const c=makeCharacter("新しいキャラクター");data.characters.push(c);data.activeCharacterId=c.id;saveSilent();render();tab("ce");toast("キャラクターを追加したよ")}
+async function removeCharacter(){if(data.characters.length<=1)return toast("最後の1人は削除できないよ");const c=activeChar();if(!confirm(`「${c.name}」を削除する？`))return;await deleteImage("char:"+c.id);data.characters=data.characters.filter(x=>x.id!==c.id);data.activeCharacterId=data.characters[0].id;delete imageCache.chars[c.id];save();toast("キャラクターを削除したよ")}
 function saveGifts(){for(const g of data.gifts){g.owned=Number($("o_"+g.id).value);g.normal=$("n_"+g.id).value;g.love=$("l_"+g.id).value;g.great=$("g_"+g.id).value;g.fav=Number($("f_"+g.id).value)}save();toast("贈り物設定を保存したよ")}
 function saveOutfits(){for(const o of data.outfits)o.name=$("out_"+o.id).value;save();toast("衣装設定を保存したよ")}
+function addGift(){const name=$("newGiftName").value.trim();if(!name)return toast("名前を入れてね");const id="gift_"+Date.now();data.gifts.push({id,name,icon:$("newGiftIcon").value||"🎁",rarity:$("newGiftRarity").value,fav:5,normal:"ありがとう。",love:"これ、好きかも。",great:"大切にするね。",owned:0});data.images.gifts[id]="";save();toast(name+"を追加したよ")}
+function addOutfit(){const name=$("newOutfitName").value.trim();if(!name)return toast("名前を入れてね");const id="outfit_"+Date.now();data.outfits.push({id,name,rarity:$("newOutfitRarity").value,owned:false});data.images.outfits[id]="";save();toast(name+"を追加したよ")}
 function download(name,blob){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function exportJSON(){download("hanagasumi-data.json",new Blob([JSON.stringify(data,null,2)],{type:"application/json"}))}
-function importJSON(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{data=JSON.parse(r.result); if(!data.images)data.images={character:"",gifts:{},outfits:{}}; if(!data.images.gifts)data.images.gifts={}; if(!data.images.outfits)data.images.outfits={}; save();toast("読み込んだよ")}catch(e){toast("JSONを読み込めなかったよ")}};r.readAsText(f)}
-function installGuide(){showModal(`<h3>iPhoneでアプリ化する方法</h3><p>1. このゲームをWeb上のURLで開く<br>2. Safariの共有ボタンを押す<br>3. 「ホーム画面に追加」を選ぶ<br>4. 「花霞」を追加する</p><p class="hint">ホーム画面から起動すると、アプリに近い表示になります。</p>`)}
+function exportJSON(){download("musubidokoro-data.json",new Blob([JSON.stringify(data,null,2)],{type:"application/json"}))}
+function importJSON(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.characters))throw new Error("old format");data=x;data.images=data.images||{gifts:{},outfits:{}};data.images.gifts=data.images.gifts||{};data.images.outfits=data.images.outfits||{};save();toast("読み込んだよ")}catch(e){toast("このJSONは新しい形式じゃないよ")}};r.readAsText(f)}
+function resetProject(){if(!confirm("ゲームデータを初期化して、キャラクターを空の状態に戻す？"))return;localStorage.removeItem("musubidokoro-v5");location.reload()}
+function installGuide(){showModal(`<h3>iPhoneでアプリ化する方法</h3><p>1. このゲームをWeb上のURLで開く<br>2. Safariの共有ボタンを押す<br>3. 「ホーム画面に追加」を選ぶ<br>4. 「むすびどころ」を追加する</p>`)}
 function showModal(x){$("modalBody").innerHTML=x;$("modal").classList.add("show")}function closeModal(){$("modal").classList.remove("show")}
-// Simple ZIP writer: no external libraries.
 function crc32(b){let c=-1;for(let x of b){c^=x;for(let i=0;i<8;i++)c=(c>>>1)^(-(c&1)&0xedb88320)}return(c^-1)>>>0}
 function u16(n){return[n&255,n>>>8&255]}function u32(n){return[n&255,n>>>8&255,n>>>16&255,n>>>24&255]}
 function zipStore(files){const enc=new TextEncoder(),local=[],central=[];let off=0;for(const f of files){const nb=enc.encode(f.name),db=enc.encode(f.data),c=crc32(db),h=new Uint8Array([80,75,3,4,20,0,0,0,0,0,0,0,...u16(0),...u16(0),...u32(c),...u32(db.length),...u32(db.length),...u16(nb.length),0,0,...nb]);local.push(h,db);central.push(new Uint8Array([80,75,1,2,20,0,20,0,0,0,0,0,0,0,...u16(0),...u16(0),...u32(c),...u32(db.length),...u32(db.length),...u16(nb.length),0,0,0,0,0,0,0,0,...u32(off),...nb]));off+=h.length+db.length}const cd=central.reduce((n,x)=>n+x.length,0),end=new Uint8Array([80,75,5,6,0,0,0,0,...u16(files.length),...u16(files.length),...u32(cd),...u32(off),0,0]);return new Blob([...local,...central,end],{type:"application/zip"})}
-function exportZip(){const files=[{name:"index.html",data:document.documentElement.outerHTML},{name:"manifest.webmanifest",data:JSON.stringify(manifest,null,2)},{name:"hanagasumi-data.json",data:JSON.stringify(data,null,2)},{name:"README.txt",data:"花霞 PWA 試作\\nSafariでWeb上に配置して開き、共有→ホーム画面に追加でアプリ風に起動できます。\\n"}];download("hanagasumi-pwa.zip",zipStore(files))}
-const manifest={name:"花霞",short_name:"花霞",start_url:"./",display:"standalone",background_color:"#f8f0de",theme_color:"#8f3438",lang:"ja"};
+function exportZip(){const files=[{name:"index.html",data:document.documentElement.outerHTML},{name:"manifest.webmanifest",data:JSON.stringify(manifest,null,2)},{name:"musubidokoro-data.json",data:JSON.stringify(data,null,2)},{name:"README.txt",data:"むすびどころ PWA\nSafariでWeb上に配置して開き、共有→ホーム画面に追加でアプリ風に起動できます。\n"}];download("musubidokoro-pwa.zip",zipStore(files))}
+const manifest={name:"むすびどころ",short_name:"むすびどころ",start_url:"./",display:"standalone",background_color:"#f8f0de",theme_color:"#8f3438",lang:"ja"};
 (async()=>{await loadImages();render();if("serviceWorker" in navigator){navigator.serviceWorker.register("./service-worker.js").catch(()=>{})}})();
 </script>
 </body></html>
